@@ -1,0 +1,21 @@
+android.applicationVariants.all { variant ->
+    variant.assemble.doLast {
+        //If this is a 'release' build, reveal the compiled apk in finder/explorer
+        if (variant.buildType.name.contains('release')) {
+
+            def path = null;
+            variant.outputs.each { output ->
+                path = output.outputFile
+            }
+
+            exec {
+                ignoreExitValue true
+                if (System.properties['os.name'].toLowerCase().contains('mac os x')) {
+                    commandLine 'open', '-R', path
+                } else if (System.properties['os.name'].toLowerCase().contains('windows')) {
+                    commandLine 'explorer', '/select,', path
+                }
+            }
+        }
+    }
+}
