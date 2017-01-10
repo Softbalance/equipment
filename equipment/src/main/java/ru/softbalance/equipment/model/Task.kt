@@ -10,5 +10,5 @@ class Task {
     var type = TaskType.STRING
 
     @JsonProperty("param")
-    var params: Parameters? = null
+    var params: Parameters = Parameters()
 }

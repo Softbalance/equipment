@@ -7,7 +7,6 @@ import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.printserver.api.PrintServerApi
 import ru.softbalance.equipment.model.printserver.api.model.TasksRequest
 
-
 class PrintServer(val api: PrintServerApi, val settings: String) : EcrDriver {
     override fun execute(tasks: List<Task>): Observable<EquipmentResponse> {
         return Observable.fromCallable { prepareRequest(tasks) }
