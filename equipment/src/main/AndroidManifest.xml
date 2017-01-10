@@ -5,9 +5,9 @@
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:supportsRtl="true">
-        <activity android:name=".SomeLibActivity"></activity>
+        android:supportsRtl="false"
+        android:theme="@style/AppTheme">
+        <activity android:name=".view.SomeLibActivity" />
     </application>
 
 </manifest>

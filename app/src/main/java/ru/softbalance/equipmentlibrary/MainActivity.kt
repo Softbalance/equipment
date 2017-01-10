@@ -1,8 +1,9 @@
 package ru.softbalance.equipmentlibrary
 
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import ru.softbalance.equipment.view.SomeLibActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,6 +12,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById(R.id.button).setOnClickListener {
-            startActivity(Intent(this, ru.softbalance.equipment.SomeLibActivity::class.java)) }
+            startActivity(Intent(this, SomeLibActivity::class.java))
+        }
     }
 }
