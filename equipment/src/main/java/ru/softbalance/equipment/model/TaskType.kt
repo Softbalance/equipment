@@ -1,17 +1,36 @@
 package ru.softbalance.equipment.model
 
-enum class TaskType(val value : String) {
-    STRING("String"),
-    BARCODE("BarCode"),
-    IMAGE("Image"),
-    REGISTRATION("Registration"),
-    CLOSE_CHECK("CloseCheck"),
-    CANCEL_CHECK("CancelCheck"),
-    OPEN_CHECK_SELL("OpenCheckSell"),
-    PAYMENT("Payment"),
-    OPEN_CHECK_RETURN("OpenCheckReturn"),
-    RETURN("Return"),
-    CASH_INCOME("CashIncome"),
-    CASH_OUTCOME("CashOutcome"),
-    CLIENT_CONTACT("ClientContact")
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+import com.fasterxml.jackson.annotation.JsonProperty
+
+enum class TaskType {
+    @JsonProperty("String")
+    STRING,
+    @JsonProperty("BarCode")
+    BARCODE,
+    @JsonProperty("Image")
+    IMAGE,
+    @JsonProperty("Registration")
+    REGISTRATION,
+    @JsonProperty("CloseCheck")
+    CLOSE_CHECK,
+    @JsonProperty("CancelCheck")
+    CANCEL_CHECK,
+    @JsonProperty("OpenCheckSell")
+    OPEN_CHECK_SELL,
+    @JsonProperty("Payment")
+    PAYMENT,
+    @JsonProperty("OpenCheckReturn")
+    OPEN_CHECK_RETURN,
+    @JsonProperty("Return")
+    RETURN,
+    @JsonProperty("CashIncome")
+    CASH_INCOME,
+    @JsonProperty("CashOutcome")
+    CASH_OUTCOME,
+    @JsonProperty("ClientContact")
+    CLIENT_CONTACT,
+    @JsonEnumDefaultValue
+    @JsonProperty("Unknown")
+    UNKNOWN
 }

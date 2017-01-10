@@ -1,7 +1,12 @@
 package ru.softbalance.equipment.model
 
-enum class Alignment(val value: String) {
-    LEFT("Left"),
-    CENTER("Center"),
-    RIGHT("Right")
+import com.fasterxml.jackson.annotation.JsonProperty
+
+enum class Alignment {
+    @JsonProperty("Left")
+    LEFT,
+    @JsonProperty("Center")
+    CENTER,
+    @JsonProperty("Right")
+    RIGHT
 }
