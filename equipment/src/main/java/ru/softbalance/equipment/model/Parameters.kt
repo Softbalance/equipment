@@ -33,7 +33,8 @@ class Parameters {
 
     var wrap: Boolean? = null
 
-    var alignment: Alignment? = null
+    @Alignment
+    var alignment: String? = null
 
     var newLine: Boolean? = null
 
@@ -66,5 +67,6 @@ class Parameters {
 
     var printDoc: Boolean? = null
 
-    var reportType: ReportType? = null
+    @ReportType
+    var reportType: Int? = null
 }

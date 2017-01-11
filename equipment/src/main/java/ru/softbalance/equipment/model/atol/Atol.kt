@@ -103,7 +103,7 @@ class Atol(val context: Context,
             TaskType.CLIENT_CONTACT -> setClientContact(task)
             TaskType.REPORT -> report(task)
             else -> {
-                Log.e(Atol::class.java.simpleName, "The operation ${task.type.name} isn't supported")
+                Log.e(Atol::class.java.simpleName, "The operation type ${task.type} isn't supported")
                 return false
             }
         }
@@ -225,7 +225,7 @@ class Atol(val context: Context,
         return driver.PrintString().isOK()
     }
 
-    private fun convertAlign(alignment: Alignment): Int {
+    private fun convertAlign(@Alignment alignment: String): Int {
         when (alignment) {
             Alignment.CENTER -> return IFptr.ALIGNMENT_CENTER
             Alignment.RIGHT -> return IFptr.ALIGNMENT_RIGHT
@@ -258,7 +258,7 @@ class Atol(val context: Context,
         cancelCheck()
 
         val mode: Int
-        if (task.params.reportType == ReportType.ReportZ) {
+        if (task.params.reportType == ReportType.REPORT_Z) {
             mode = IFptr.MODE_REPORT_CLEAR
         } else {
             mode = IFptr.MODE_REPORT_NO_CLEAR
@@ -271,11 +271,11 @@ class Atol(val context: Context,
         val reportType: Int
 
         when (task.params.reportType) {
-            ReportType.ReportZ -> reportType = IFptr.REPORT_Z
-            ReportType.ReportX -> reportType = IFptr.REPORT_X
-            ReportType.ReportDepartment -> reportType = IFptr.REPORT_DEPARTMENTS
-            ReportType.ReportCashiers -> reportType = IFptr.REPORT_CASHIERS
-            ReportType.ReportHours -> reportType = IFptr.REPORT_HOURS
+            ReportType.REPORT_Z -> reportType = IFptr.REPORT_Z
+            ReportType.REPORT_X -> reportType = IFptr.REPORT_X
+            ReportType.REPORT_DEPARTMENT -> reportType = IFptr.REPORT_DEPARTMENTS
+            ReportType.REPORT_CASHIERS -> reportType = IFptr.REPORT_CASHIERS
+            ReportType.REPORT_HOURS -> reportType = IFptr.REPORT_HOURS
             else -> {
                 Log.e(Atol::class.java.simpleName, "The report operation ${task.params.reportType} isn't supported")
                 return false

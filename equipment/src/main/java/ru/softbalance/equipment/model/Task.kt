@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class Task {
     var data = ""
 
+    @TaskType
     var type = TaskType.STRING
 
     @JsonProperty("param")
