@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Equipment</string>
+    <string name="equipment_error_code">code %1$d: %2$s</string>
+    <string name="equipment_init_failure">Initialization failure</string>
+    <string name="equipment_incorrect_settings">Incorrect settings</string>
+    <string name="equipment_payment_incorrect">Incorrect payment amount</string>
+    <string name="equipment_type_close_incorrect">Incorrect type of payment</string>
+    <string name="equipment_incorrect_product_name">The product name is incorrect</string>
+    <string name="equipment_incorrect_product_price">The product price is incorrect</string>
+    <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
 </resources>
