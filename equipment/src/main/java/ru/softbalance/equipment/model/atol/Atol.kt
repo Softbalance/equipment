@@ -8,6 +8,7 @@ import io.reactivex.Observable
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.*
 import java.math.BigDecimal
+import java.util.*
 
 class Atol(val context: Context,
            val settings: String) : EcrDriver {
@@ -102,6 +103,10 @@ class Atol(val context: Context,
             TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_INCOME, task)
             TaskType.CLIENT_CONTACT -> setClientContact(task)
             TaskType.REPORT -> report(task)
+            TaskType.SYNC_TIME -> syncTime(task)
+            TaskType.PRINT_HEADER -> printHeader(task)
+            TaskType.PRINT_FOOTER -> printFooter(task)
+            TaskType.CUT -> cut(task)
             else -> {
                 Log.e(Atol::class.java.simpleName, "The operation type ${task.type} isn't supported")
                 return false
@@ -284,6 +289,30 @@ class Atol(val context: Context,
 
         driver.put_ReportType(reportType)
         return driver.Report().isOK()
+    }
+
+    private fun cut(task: Task): Boolean {
+        driver.PartialCut().isOK() || driver.FullCut().isOK()
+        return true
+    }
+
+    private fun syncTime(task: Task): Boolean {
+        cancelCheck()
+
+        return with(Date()) {
+            driver.put_Date(this).isOK()
+                    && driver.put_Time(this).isOK()
+                    && driver.SetDate().isOK()
+                    && driver.SetTime().isOK()
+        }
+    }
+
+    private fun printHeader(task: Task): Boolean {
+        return driver.PrintHeader().isOK()
+    }
+
+    private fun printFooter(task: Task): Boolean {
+        return driver.PrintFooter().isOK()
     }
 }
 

@@ -19,7 +19,11 @@ import java.lang.annotation.RetentionPolicy;
         TaskType.CASH_INCOME,
         TaskType.CASH_OUTCOME,
         TaskType.CLIENT_CONTACT,
-        TaskType.REPORT})
+        TaskType.REPORT,
+        TaskType.SYNC_TIME,
+        TaskType.PRINT_HEADER,
+        TaskType.PRINT_FOOTER,
+        TaskType.CUT})
 public @interface TaskType {
 
     String STRING = "String";
@@ -36,4 +40,8 @@ public @interface TaskType {
     String CASH_OUTCOME = "CashOutcome";
     String CLIENT_CONTACT = "ClientContact";
     String REPORT = "Report";
+    String SYNC_TIME = "SyncTime";
+    String PRINT_HEADER = "PrintHeader";
+    String PRINT_FOOTER = "PrintFooter";
+    String CUT = "Cut";
 }
