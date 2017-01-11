@@ -5,7 +5,7 @@
     <string name="equipment_incorrect_settings">Некорректные настройки</string>
     <string name="equipment_payment_incorrect">Некорректная сумма оплаты</string>
     <string name="equipment_type_close_incorrect">Некорректный вариант оплаты</string>
-    <string name="equipment_absent_product_name">Некорректное название товара</string>
+    <string name="equipment_incorrect_product_name">Некорректное название товара</string>
     <string name="equipment_incorrect_product_price">Некорректная цена товара</string>
     <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
 </resources>

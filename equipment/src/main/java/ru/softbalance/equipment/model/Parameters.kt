@@ -65,4 +65,6 @@ class Parameters {
     var tax: Int? = null
 
     var printDoc: Boolean? = null
+
+    var reportType: ReportType? = null
 }

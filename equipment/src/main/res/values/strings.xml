@@ -7,4 +7,5 @@
     <string name="equipment_type_close_incorrect">Incorrect type of payment</string>
     <string name="equipment_incorrect_product_name">The product name is incorrect</string>
     <string name="equipment_incorrect_product_price">The product price is incorrect</string>
+    <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
 </resources>

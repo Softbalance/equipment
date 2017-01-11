@@ -9,7 +9,6 @@ import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.*
 import java.math.BigDecimal
 
-
 class Atol(val context: Context,
            val settings: String) : EcrDriver {
 
@@ -35,8 +34,8 @@ class Atol(val context: Context,
 
     private fun Int.isOK() = this == RESULT_OK
     private fun Int.isFail() = this != RESULT_OK
-    private fun BigDecimal?.isPositive() = (this ?: BigDecimal.ZERO).compareTo(BigDecimal.ZERO) == 1
 
+    @Throws(IllegalArgumentException::class)
     private fun prepareDriver(): IFptr {
         val driver = Fptr()
         driver.create(context)
@@ -58,10 +57,10 @@ class Atol(val context: Context,
         } else {
             info = context.getString(R.string.equipment_error_code,
                     driver._ResultCode,
-                    driver._ResultDescription);
+                    driver._ResultDescription)
         }
 
-        return info;
+        return info
     }
 
     private fun executeTasksInternal(tasks: List<Task>): EquipmentResponse {
@@ -102,6 +101,7 @@ class Atol(val context: Context,
             TaskType.CASH_INCOME -> cashOperation(IFptr.CASH_INCOME, task)
             TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_INCOME, task)
             TaskType.CLIENT_CONTACT -> setClientContact(task)
+            TaskType.REPORT -> report(task)
             else -> {
                 Log.e(Atol::class.java.simpleName, "The operation ${task.type.name} isn't supported")
                 return false
@@ -126,7 +126,7 @@ class Atol(val context: Context,
         }
 
         val price = task.params.price
-        if (price == null || !price.isPositive()) {
+        if (price == null || price <= BigDecimal.ZERO) {
             lastInfo = context.getString(R.string.equipment_incorrect_product_price)
             return false
         } else {
@@ -134,7 +134,7 @@ class Atol(val context: Context,
         }
 
         val quantity = task.params.quantity
-        if (quantity == null || !quantity.isPositive()) {
+        if (quantity == null || quantity <= BigDecimal.ZERO) {
             lastInfo = context.getString(R.string.equipment_incorrect_product_quantity)
             return false
         } else {
@@ -150,7 +150,7 @@ class Atol(val context: Context,
 
     private fun payment(task: Task): Boolean {
         val sum = task.params.sum ?: BigDecimal.ZERO
-        if (sum.isPositive()) {
+        if (sum > BigDecimal.ZERO) {
             driver.put_Summ(sum.toDouble())
         } else {
             lastInfo = context.getString(R.string.equipment_payment_incorrect)
@@ -188,7 +188,7 @@ class Atol(val context: Context,
 
         if (prepareRegistration()) {
             val amount = task.params.sum ?: BigDecimal.ZERO
-            if (amount.isPositive()) {
+            if (amount > BigDecimal.ZERO) {
                 driver.put_Summ(amount.toDouble())
                 when (cashType) {
                     IFptr.CASH_INCOME -> isOK = driver.CashIncome().isOK()
@@ -252,6 +252,38 @@ class Atol(val context: Context,
         driver.put_UserPassword(driver._UserPassword)
         driver.put_Mode(mode)
         return driver.SetMode().isOK()
+    }
+
+    private fun report(task: Task): Boolean {
+        cancelCheck()
+
+        val mode: Int
+        if (task.params.reportType == ReportType.ReportZ) {
+            mode = IFptr.MODE_REPORT_CLEAR
+        } else {
+            mode = IFptr.MODE_REPORT_NO_CLEAR
+        }
+
+        if (!setMode(mode)) {
+            return false
+        }
+
+        val reportType: Int
+
+        when (task.params.reportType) {
+            ReportType.ReportZ -> reportType = IFptr.REPORT_Z
+            ReportType.ReportX -> reportType = IFptr.REPORT_X
+            ReportType.ReportDepartment -> reportType = IFptr.REPORT_DEPARTMENTS
+            ReportType.ReportCashiers -> reportType = IFptr.REPORT_CASHIERS
+            ReportType.ReportHours -> reportType = IFptr.REPORT_HOURS
+            else -> {
+                Log.e(Atol::class.java.simpleName, "The report operation ${task.params.reportType} isn't supported")
+                return false
+            }
+        }
+
+        driver.put_ReportType(reportType)
+        return driver.Report().isOK()
     }
 }
 

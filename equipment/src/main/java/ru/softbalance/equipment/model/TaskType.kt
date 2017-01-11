@@ -30,6 +30,8 @@ enum class TaskType {
     CASH_OUTCOME,
     @JsonProperty("ClientContact")
     CLIENT_CONTACT,
+    @JsonProperty("Report")
+    REPORT,
     @JsonEnumDefaultValue
     @JsonProperty("Unknown")
     UNKNOWN

@@ -14,9 +14,9 @@ class PrintServer(val api: PrintServerApi, val settings: String) : EcrDriver {
     }
 
     private fun prepareRequest(tasks: List<Task>): TasksRequest {
-        val request = TasksRequest()
-        request.settings = settings
-        request.tasks = tasks
-        return request
+        return TasksRequest().apply {
+            this.tasks = tasks
+            this.settings = settings
+        }
     }
 }
