@@ -314,5 +314,9 @@ class Atol(val context: Context,
     private fun printFooter(task: Task): Boolean {
         return driver.PrintFooter().isOK()
     }
+
+    fun getDefaultSettings() : String {
+        return driver._DeviceSettings
+    }
 }
 

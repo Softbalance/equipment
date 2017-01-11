@@ -4,6 +4,9 @@
     package="ru.softbalance.equipmentlibrary">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!--ATOL Printer Driver-->
 
     <application
         android:allowBackup="true"
@@ -20,6 +23,35 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atol.drivers.fptr.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.atol.drivers.fptr.settings.BluetoothSearchActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.fptr.settings.UDPSearchActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.fptr.settings.USBSearchActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.fptr.settings.TCPSettingsActivity"
+            android:configChanges="orientation|keyboardHidden" />
+
+        <activity android:name="com.atol.drivers.usb.UsbAttachedActivity">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
         </activity>
     </application>
 
