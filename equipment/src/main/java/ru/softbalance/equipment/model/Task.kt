@@ -4,12 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class Task {
-    var data = ""
-
-    @TaskType
-    var type = TaskType.STRING
-
-    @JsonProperty("param")
-    var params: Parameters = Parameters()
-}
+class Task(var data: String = "",
+           @TaskType var type: String = TaskType.STRING,
+           @JsonProperty("param") var params: Parameters = Parameters())

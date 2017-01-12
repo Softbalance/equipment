@@ -103,10 +103,10 @@ class Atol(val context: Context,
             TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_INCOME, task)
             TaskType.CLIENT_CONTACT -> setClientContact(task)
             TaskType.REPORT -> report(task)
-            TaskType.SYNC_TIME -> syncTime(task)
-            TaskType.PRINT_HEADER -> printHeader(task)
-            TaskType.PRINT_FOOTER -> printFooter(task)
-            TaskType.CUT -> cut(task)
+            TaskType.SYNC_TIME -> syncTime()
+            TaskType.PRINT_HEADER -> printHeader()
+            TaskType.PRINT_FOOTER -> printFooter()
+            TaskType.CUT -> cut()
             else -> {
                 Log.e(Atol::class.java.simpleName, "The operation type ${task.type} isn't supported")
                 return false
@@ -291,12 +291,12 @@ class Atol(val context: Context,
         return driver.Report().isOK()
     }
 
-    private fun cut(task: Task): Boolean {
+    private fun cut(): Boolean {
         driver.PartialCut().isOK() || driver.FullCut().isOK()
         return true
     }
 
-    private fun syncTime(task: Task): Boolean {
+    private fun syncTime(): Boolean {
         cancelCheck()
 
         return with(Date()) {
@@ -307,15 +307,15 @@ class Atol(val context: Context,
         }
     }
 
-    private fun printHeader(task: Task): Boolean {
+    private fun printHeader(): Boolean {
         return driver.PrintHeader().isOK()
     }
 
-    private fun printFooter(task: Task): Boolean {
-        return driver.PrintFooter().isOK()
+    private fun printFooter(): Boolean {
+        return setMode(IFptr.MODE_REPORT_NO_CLEAR) && driver.PrintFooter().isOK()
     }
 
-    fun getDefaultSettings() : String {
+    fun getDefaultSettings(): String {
         return driver._DeviceSettings
     }
 }

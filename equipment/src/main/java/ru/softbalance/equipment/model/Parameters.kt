@@ -6,67 +6,66 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class Parameters {
+class Parameters(
+        var font: Int? = null,
 
-    var font: Int? = null
+        var bold: Boolean? = null,
 
-    var bold: Boolean? = null
+        var italic: Boolean? = null,
 
-    var italic: Boolean? = null
+        @JsonProperty("dblheight")
+        var doubleHeight: Boolean? = null,
 
-    @JsonProperty("dblheight")
-    var doubleHeight: Boolean? = null
+        var underline: Boolean? = null,
 
-    var underline: Boolean? = null
+        var overline: Boolean? = null,
 
-    var overline: Boolean? = null
+        var negative: Boolean? = null,
 
-    var negative: Boolean? = null
+        var upsideDown: Boolean? = null,
 
-    var upsideDown: Boolean? = null
+        var zeroSlashed: Boolean? = null,
 
-    var zeroSlashed: Boolean? = null
+        var charRotation: Int? = null,
 
-    var charRotation: Int? = null
+        var standardColor: Boolean? = null,
 
-    var standardColor: Boolean? = null
+        var wrap: Boolean? = null,
 
-    var wrap: Boolean? = null
+        @Alignment
+        var alignment: String? = null,
 
-    @Alignment
-    var alignment: String? = null
+        var newLine: Boolean? = null,
 
-    var newLine: Boolean? = null
+        var lineSpacingMax: Boolean? = null,
 
-    var lineSpacingMax: Boolean? = null
+        var barCodeHeight: Int? = null,
 
-    var barCodeHeight: Int? = null
+        var barCodeType: String? = null,
 
-    var barCodeType: String? = null
+        @JsonProperty("BarCodeHasCC")
+        var barCodeHasControlSymbol: Boolean? = null,
 
-    @JsonProperty("BarCodeHasCC")
-    var barCodeHasControlSymbol: Boolean? = null
+        var barCodePrintText: Boolean? = null,
 
-    var barCodePrintText: Boolean? = null
+        var price: BigDecimal? = null,
 
-    var price: BigDecimal? = null
+        var quantity: BigDecimal? = null,
 
-    var quantity: BigDecimal? = null
+        var department: String? = null,
 
-    var department: String? = null
+        @JsonProperty("Summ")
+        var sum: BigDecimal? = null,
 
-    @JsonProperty("Summ")
-    var sum: BigDecimal? = null
+        var typeClose: Int? = null,
 
-    var typeClose: Int? = null
+        @JsonProperty("EnableCheckSumm")
+        var enableCheckSum: Boolean? = null,
 
-    @JsonProperty("EnableCheckSumm")
-    var enableCheckSum: Boolean? = null
+        var tax: Int? = null,
 
-    var tax: Int? = null
+        var printDoc: Boolean? = null,
 
-    var printDoc: Boolean? = null
-
-    @ReportType
-    var reportType: Int? = null
-}
+        @ReportType
+        var reportType: Int? = null
+)

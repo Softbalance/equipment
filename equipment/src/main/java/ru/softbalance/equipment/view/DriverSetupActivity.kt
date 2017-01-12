@@ -34,8 +34,9 @@ class DriverSetupActivity : AppCompatActivity() {
         driver.finish()
         driver = Atol(this, settings)
 
-        val tasks = listOf(Task().apply { data = "Тестовая печать" },
-                Task().apply { type = TaskType.PRINT_FOOTER })
+        val tasks = listOf(
+                Task(data = "Тестовая печать"),
+                Task(type = TaskType.PRINT_HEADER))
 
         driver.execute(tasks)
                 .subscribeOn(Schedulers.io())
