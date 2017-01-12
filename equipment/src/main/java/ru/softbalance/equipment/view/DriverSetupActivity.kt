@@ -1,75 +1,52 @@
 package ru.softbalance.equipment.view
 
+import android.app.Activity
 import android.content.Intent
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.Toast
-import com.atol.drivers.fptr.settings.SettingsActivity
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import ru.softbalance.equipment.R
-import ru.softbalance.equipment.databinding.ActivityLibBinding
-import ru.softbalance.equipment.model.Task
-import ru.softbalance.equipment.model.TaskType
-import ru.softbalance.equipment.model.atol.Atol
+import ru.softbalance.equipment.view.fragment.AtolFragment
 
-class DriverSetupActivity : AppCompatActivity() {
+class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
 
     companion object {
-        const val REQUEST_CONNECT_DEVICE = 1
+        const val DRIVER_TYPE = "DRIVER_TYPE";
+        const val DRIVER_TYPE_ATOL = 1;
+        const val DRIVER_TYPE_SERVER = 2;
+
+        const val SETTINGS_ARG = "SETTINGS_ARG";
     }
 
-    private lateinit var driver: Atol
-    private var settings = ""
+    var settings:String = "";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        driver = Atol(this, settings)
 
-        val binding = DataBindingUtil.setContentView<ActivityLibBinding>(this, R.layout.activity_lib)
-        binding.connect.setOnClickListener { startConnection() }
-        binding.testPrint.setOnClickListener { testPrint() }
-    }
+        setContentView(R.layout.activity_lib)
 
-    private fun testPrint() {
-        driver.finish()
-        driver = Atol(this, settings)
+        supportActionBar?.setHomeButtonEnabled(true)
 
-        val tasks = listOf(
-                Task(data = "Тестовая печать"),
-                Task(type = TaskType.PRINT_HEADER))
+        val fm = supportFragmentManager
+        if (savedInstanceState == null) {
 
-        driver.execute(tasks)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ toast(it.resultInfo) }, { toast(it.toString()) })
-    }
+            val fr = when(intent.getIntExtra(DRIVER_TYPE, DRIVER_TYPE_ATOL)){
+                DRIVER_TYPE_ATOL -> AtolFragment.newInstance()
+                DRIVER_TYPE_SERVER -> AtolFragment.newInstance()
+                else -> AtolFragment.newInstance()
+            }
 
-    private fun toast(text: String) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
-    }
-
-    private fun startConnection() {
-        val intent = Intent(this, SettingsActivity::class.java)
-        if (settings.isEmpty()) {
-            settings = driver.getDefaultSettings()
-        }
-        intent.putExtra(SettingsActivity.DEVICE_SETTINGS, settings)
-        startActivityForResult(intent, REQUEST_CONNECT_DEVICE)
-    }
-
-    fun extractSettings(data: Bundle?): String? {
-        if (data != null && data.containsKey(SettingsActivity.DEVICE_SETTINGS)) {
-            return data.getString(SettingsActivity.DEVICE_SETTINGS)
-        } else {
-            return null
+            fm.beginTransaction()
+                    .add(R.id.fragmentContainer, fr, AtolFragment::class.java.simpleName)
+                    .commit()
         }
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == REQUEST_CONNECT_DEVICE && data.extras != null) {
-            settings = extractSettings(data.extras) ?: ""
-        }
+    override fun onSettingsSelected(settings: String) {
+        this.settings = settings
+    }
+
+    override fun onBackPressed() {
+        setResult(Activity.RESULT_OK, Intent().putExtra(SETTINGS_ARG, settings))
+        finish()
     }
 }

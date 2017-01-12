@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!--ATOL Printer Driver-->
 
     <application
+        android:name="ru.softbalance.equipment.EquipmentApp"
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"

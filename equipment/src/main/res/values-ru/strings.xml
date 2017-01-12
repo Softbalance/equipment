@@ -8,4 +8,9 @@
     <string name="equipment_incorrect_product_name">Некорректное название товара</string>
     <string name="equipment_incorrect_product_price">Некорректная цена товара</string>
     <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
+
+    <string name="connection">Подключение</string>
+    <string name="test_print">Тестовая печать</string>
+    <string name="text_print">Тестовая печать</string>
+    <string name="setting_received">Настройки успешно получены</string>
 </resources>

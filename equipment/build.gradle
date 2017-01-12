@@ -58,6 +58,7 @@ dependencies {
     // Android support
     compile "com.android.support:appcompat-v7:$supportVers"
     compile "com.android.support:design:$supportVers"
+    compile 'com.android.support:multidex:1.0.1'
 
     kapt "com.android.databinding:compiler:$androidPluginVersion"
 
