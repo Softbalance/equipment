@@ -95,6 +95,7 @@ kapt {
 }
 
 def supportVers = '25.1.0'
+def mockitoVers = '2.4.2'
 
 dependencies {
 
@@ -106,10 +107,21 @@ dependencies {
     // Android support
     compile "com.android.support:appcompat-v7:$supportVers"
     compile "com.android.support:design:$supportVers"
+    kapt "com.android.databinding:compiler:$androidPluginVersion"
 
     // UI
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
 
     // Testing
     testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:$mockitoVers"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+    androidTestCompile "org.mockito:mockito-core:$mockitoVers"
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile "com.android.support:support-annotations:$supportVers"
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
 }

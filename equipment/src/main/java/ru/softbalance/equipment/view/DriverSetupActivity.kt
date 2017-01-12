@@ -1,6 +1,7 @@
 package ru.softbalance.equipment.view
 
 import android.content.Intent
+import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
@@ -8,6 +9,7 @@ import com.atol.drivers.fptr.settings.SettingsActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import ru.softbalance.equipment.R
+import ru.softbalance.equipment.databinding.ActivityLibBinding
 import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.atol.Atol
@@ -25,9 +27,9 @@ class DriverSetupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         driver = Atol(this, settings)
 
-        setContentView(R.layout.activity_lib)
-        findViewById(R.id.connect).setOnClickListener { startConnection() }
-        findViewById(R.id.testPrint).setOnClickListener { testPrint() }
+        val binding = DataBindingUtil.setContentView<ActivityLibBinding>(this, R.layout.activity_lib)
+        binding.connect.setOnClickListener { startConnection() }
+        binding.testPrint.setOnClickListener { testPrint() }
     }
 
     private fun testPrint() {
