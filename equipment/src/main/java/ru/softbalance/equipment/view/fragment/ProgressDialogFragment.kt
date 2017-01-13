@@ -20,13 +20,18 @@ class ProgressDialogFragment : AppCompatDialogFragment() {
             return newInstance(progressStyle, null, message, false)
         }
 
+        private const val TITLE_PARAM = "title"
+        private const val MESSAGE_PARAM = "message"
+        private const val PROGRESS_STYLE_PARAM = "progressStyle"
+        private const val IS_CANCELABLE_PARAM = "isCancelable"
+
         fun newInstance(progressStyle: Int, title: String?, message: String, isCancelable: Boolean): ProgressDialogFragment {
             val dialog = ProgressDialogFragment()
             val args = Bundle()
-            args.putString("title", title)
-            args.putString("message", message)
-            args.putInt("progressStyle", progressStyle)
-            args.putBoolean("isCancelable", isCancelable)
+            args.putString(TITLE_PARAM, title)
+            args.putString(MESSAGE_PARAM, message)
+            args.putInt(PROGRESS_STYLE_PARAM, progressStyle)
+            args.putBoolean(IS_CANCELABLE_PARAM, isCancelable)
             dialog.setArguments(args)
             return dialog
         }
@@ -48,10 +53,10 @@ class ProgressDialogFragment : AppCompatDialogFragment() {
         super.onCreate(savedInstanceState)
 
         with(getArguments()) {
-           dialogCancelable = getBoolean("isCancelable")
-           progressStyle = getInt("progressStyle")
-           message = getString("message")
-           title = getString("title")
+           dialogCancelable = getBoolean(IS_CANCELABLE_PARAM)
+           progressStyle = getInt(PROGRESS_STYLE_PARAM)
+           message = getString(MESSAGE_PARAM)
+           title = getString(TITLE_PARAM)
         }
         setCancelable(dialogCancelable)
     }

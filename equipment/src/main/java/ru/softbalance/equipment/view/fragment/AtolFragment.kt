@@ -7,15 +7,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
 import com.atol.drivers.fptr.settings.SettingsActivity
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import ru.ktoddler.view.fragment.BaseFragment
 import ru.softbalance.equipment.R
-import ru.softbalance.equipment.model.Task
-import ru.softbalance.equipment.model.TaskType
-import ru.softbalance.equipment.model.atol.Atol
-
+import ru.softbalance.equipment.presenter.AtolPresenter
+import ru.softbalance.equipment.presenter.PresentersCache
+import java.util.concurrent.TimeUnit
 
 class AtolFragment : BaseFragment() {
 
@@ -24,32 +21,33 @@ class AtolFragment : BaseFragment() {
     }
 
     companion object {
+
+        const val PRESENTER_NAME = "ATOL_PRESENTER"
+
         const val REQUEST_CONNECT_DEVICE = 1
 
-        const val SAVE_SETTINGS_PARAM = "SAVE_SETTINGS_PARAM"
-
         fun newInstance(): AtolFragment = AtolFragment().apply { arguments = Bundle()  }
-
-        private var printTest : Disposable? = null
-        private var isPrinting : Boolean = false
-
-        private var connect : Button? = null
-        private var print : Button? = null
-        private var progressDialog : ProgressDialogFragment? = null
     }
 
-    private lateinit var driver: Atol
-    private var settings = ""
+    private var connect : Button? = null
+    private var print : Button? = null
+
+    private lateinit var presenter: AtolPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        settings = savedInstanceState?.getString(SAVE_SETTINGS_PARAM) ?: ""
-        if(settings.isNotEmpty() && hostParent is Callback) {
-            (hostParent as Callback).onSettingsSelected(settings)
-        }
+        val pr = PresentersCache.get(PRESENTER_NAME)
+        presenter = if (pr != null) pr as AtolPresenter else
+            PresentersCache.add(PRESENTER_NAME, AtolPresenter()) as AtolPresenter
 
-        driver = Atol(activity, settings)
+        updateResult()
+    }
+
+    fun updateResult(){
+        if(presenter.printedSuccessful && presenter.settings.isNotEmpty() && hostParent is Callback) {
+            (hostParent as Callback).onSettingsSelected(presenter.settings)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
@@ -61,69 +59,35 @@ class AtolFragment : BaseFragment() {
         connect = rootView?.findViewById(R.id.connectPrinter) as Button
         print = rootView?.findViewById(R.id.testPrint) as Button
 
-        connect?.setOnClickListener { startConnection() }
-        print?.setOnClickListener { testPrint() }
+        connect?.setOnClickListener { presenter.startConnection() }
+        print?.setOnClickListener { presenter.testPrint() }
 
-        showSettingsGot()
-
-        progressDialog = childFragmentManager.findFragmentByTag(ProgressDialogFragment::class.java.simpleName)
-                as ProgressDialogFragment?
-
-        if(!isPrinting){
-            progressDialog?.dismissAllowingStateLoss()
-        }
+        presenter.bindView(this)
 
         return rootView
     }
 
+    override fun onFinish() {
+        PresentersCache.remove(PRESENTER_NAME)
+
+        super.onFinish()
+    }
+
     override fun onDestroyView() {
-        connect = null
-        print = null
-        progressDialog = null
+        presenter.unbindView(this)
         super.onDestroyView()
     }
 
-    private fun showSettingsGot(){
-        if (settings.isNotEmpty()){
-            connect?.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                    ContextCompat.getDrawable(getActivity(), R.drawable.ic_confirm_selector), null)
-        }
+    fun showSettingsState(ok: Boolean){
+        updateResult()
+
+        connect?.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                if (ok) ContextCompat.getDrawable(getActivity(), R.drawable.ic_confirm_selector) else null,
+                null)
     }
 
-    private fun testPrint() {
-        if (!isPrinting) {
-
-            progressDialog = ProgressDialogFragment.spinner(getString(R.string.test_print))
-            progressDialog?.show(childFragmentManager, ProgressDialogFragment::class.java.simpleName)
-            isPrinting = true
-
-            driver.finish()
-            driver = Atol(activity, settings)
-
-            val tasks = listOf(
-                    Task(data = activity.getString(R.string.text_print)),
-                    Task(type = TaskType.PRINT_HEADER))
-
-            printTest = driver.execute(tasks)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isPrinting = false
-                        progressDialog?.dismissAllowingStateLoss()
-                    }
-                    .subscribe({
-                        showConfirm(it.resultInfo)
-                    }, {
-                        showError(it.toString())
-                    })
-        }
-    }
-
-    private fun startConnection() {
+    fun launchConnectionActivity(settings : String) {
         val intent = Intent(activity, SettingsActivity::class.java)
-        if (settings.isEmpty()) {
-            settings = driver.getDefaultSettings()
-        }
         intent.putExtra(SettingsActivity.DEVICE_SETTINGS, settings)
         startActivityForResult(intent, AtolFragment.REQUEST_CONNECT_DEVICE)
     }
@@ -135,17 +99,11 @@ class AtolFragment : BaseFragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == AtolFragment.REQUEST_CONNECT_DEVICE && data.extras != null) {
-            settings = extractSettings(data.extras) ?: ""
-            showInfo(getString(R.string.setting_received))
-            showSettingsGot()
-            if(hostParent is Callback) {
-                (hostParent as Callback).onSettingsSelected(settings)
-            }
+            presenter.settings = extractSettings(data.extras) ?: ""
+            Observable.just(true)
+                    .delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .doOnNext { presenter.testPrint() }
+                    .subscribe({}, Throwable::printStackTrace)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putCharSequence(SAVE_SETTINGS_PARAM, settings)
-        super.onSaveInstanceState(outState)
     }
 }

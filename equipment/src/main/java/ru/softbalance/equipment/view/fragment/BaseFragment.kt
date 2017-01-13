@@ -1,18 +1,12 @@
-package ru.ktoddler.view.fragment
+package ru.softbalance.equipment.view.fragment
 
-import android.content.Context
-import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.Toast
 import ru.ktoddler.view.View
 
 abstract class BaseFragment : Fragment(), View {
 
-    companion object {
-        private var currentContext: Context? = null
-    }
+    private var progressDialog : ProgressDialogFragment? = null
 
     protected val hostParent: Any?
         get() {
@@ -32,36 +26,31 @@ abstract class BaseFragment : Fragment(), View {
         super.onDestroy()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
-        currentContext = context;
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
-    override fun onDestroyView() {
-        currentContext = null;
-        super.onDestroyView()
-    }
-
     protected open fun onFinish() {}
 
-    private fun isFragmentActive(tag: String): Boolean {
-        val fragment = childFragmentManager.findFragmentByTag(tag)
-        return fragment != null && !fragment.isDetached && !fragment.isRemoving
-    }
+    private fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
-    private fun toast(msg: String) = Toast.makeText(currentContext, msg, Toast.LENGTH_SHORT).show()
-
-    override fun showError(err: String) = toast(err)
+    override fun showError(error: String) = toast(error)
 
     override fun showInfo(info: String) = toast(info)
 
     override fun showConfirm(confirm: String) = toast(confirm)
 
+    private fun getShowingDialog() : Fragment? =
+            childFragmentManager.findFragmentByTag(ProgressDialogFragment::class.java.simpleName)
+
     override fun showLoading(info: String) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (getShowingDialog() == null) {
+            childFragmentManager.beginTransaction().let {
+                it.add(ProgressDialogFragment.spinner(info), ProgressDialogFragment::class.java.simpleName)
+                it.commitAllowingStateLoss()
+            }
+        }
     }
 
     override fun hideLoading() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+         if(getShowingDialog() != null){
+            (getShowingDialog() as ProgressDialogFragment).dismissAllowingStateLoss()
+        }
     }
 }

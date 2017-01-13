@@ -46,7 +46,8 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
     }
 
     override fun onBackPressed() {
-        setResult(Activity.RESULT_OK, Intent().putExtra(SETTINGS_ARG, settings))
+        setResult(if (settings.isNotEmpty()) Activity.RESULT_OK else Activity.RESULT_CANCELED,
+                Intent().putExtra(SETTINGS_ARG, settings))
         finish()
     }
 }

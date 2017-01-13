@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == DRIVER_REQUEST && resultCode == RESULT_OK){
+        if (requestCode == DRIVER_REQUEST){
             val settings = if (data?.getStringExtra(SETTINGS_ARG).isNullOrEmpty())
                 "no settings data found" else data?.getStringExtra(SETTINGS_ARG)
 
