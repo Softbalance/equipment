@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.view.MenuItem
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.view.fragment.AtolFragment
 
@@ -24,6 +25,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
 
         setContentView(R.layout.activity_lib)
 
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
         val fm = supportFragmentManager
@@ -39,6 +41,15 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
                     .add(R.id.fragmentContainer, fr, AtolFragment::class.java.simpleName)
                     .commit()
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        val itemId = item?.itemId ?: 0
+        when (itemId) {
+            android.R.id.home -> onBackPressed()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onSettingsSelected(settings: String) {
