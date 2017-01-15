@@ -7,18 +7,22 @@ import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.view.fragment.AtolFragment
+import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
 class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
 
     companion object {
-        const val DRIVER_TYPE = "DRIVER_TYPE";
-        const val DRIVER_TYPE_ATOL = 1;
-        const val DRIVER_TYPE_SERVER = 2;
+        const val DRIVER_TYPE_ARG = "DRIVER_TYPE_ARG"
+        const val URL_ARG = "URL_ARG"
+        const val PORT_ARG = "PORT_ARG"
 
-        const val SETTINGS_ARG = "SETTINGS_ARG";
+        const val DRIVER_TYPE_ATOL = 1
+        const val DRIVER_TYPE_SERVER = 2
+
+        const val SETTINGS_ARG = "SETTINGS_ARG"
     }
 
-    var settings:String = "";
+    var settings:String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +35,11 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
         val fm = supportFragmentManager
         if (savedInstanceState == null) {
 
-            val fr = when(intent.getIntExtra(DRIVER_TYPE, DRIVER_TYPE_ATOL)){
+            val fr = when(intent.getIntExtra(DRIVER_TYPE_ARG, DRIVER_TYPE_ATOL)){
                 DRIVER_TYPE_ATOL -> AtolFragment.newInstance()
-                DRIVER_TYPE_SERVER -> AtolFragment.newInstance()
+                DRIVER_TYPE_SERVER -> PrintServerFragment.newInstance(
+                        intent.getStringExtra(URL_ARG),
+                        intent.getIntExtra(PORT_ARG, 0))
                 else -> AtolFragment.newInstance()
             }
 

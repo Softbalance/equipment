@@ -10,7 +10,20 @@
     <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
 
     <string name="connection">Подключение</string>
-    <string name="test_print">Тестовая печать</string>
+    <string name="test_print">Печать</string>
     <string name="text_print">Тестовая печать</string>
     <string name="setting_received">Настройки успешно получены</string>
+
+    <string name="connection_address">1. Адрес подключения</string>
+    <string name="edittext.hint.url">Сетевой адрес</string>
+    <string name="edittext.hint.port">порт</string>
+    <string name="connect">Подключиться</string>
+    <string name="device_type">2. Тип устройства</string>
+    <string name="not_selected">Не выбрано</string>
+    <string name="model">3. Модель</string>
+    <string name="driver">4. Драйвер</string>
+    <string name="connect_in_progress">Выполняется подключение …</string>
+    <string name="check_printer">5. Напечатать тестовый чек</string>
+    <string name="no_data">Нет данных</string>
+    <string name="wrong_url_format">Неверный формат адреса сервера</string>
 </resources>

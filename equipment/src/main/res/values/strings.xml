@@ -10,7 +10,20 @@
     <string name="equipment_incorrect_product_quantity">Некорректное количество товара</string>
 
     <string name="connection">Connection</string>
-    <string name="test_print">Test print</string>
+    <string name="test_print">Print</string>
     <string name="text_print">Test print</string>
     <string name="setting_received">Setting received successfully</string>
+
+    <string name="connection_address">1. Connection address</string>
+    <string name="edittext.hint.url">url address</string>
+    <string name="edittext.hint.port">port</string>
+    <string name="connect">Connect</string>
+    <string name="device_type">2. Device type</string>
+    <string name="not_selected">Not selected</string>
+    <string name="model">3. Model</string>
+    <string name="driver">4. Driver</string>
+    <string name="connect_in_progress">Connect in progress …</string>
+    <string name="check_printer">5. Check printer</string>
+    <string name="no_data">No data</string>
+    <string name="wrong_url_format">Wrong url format</string>
 </resources>
