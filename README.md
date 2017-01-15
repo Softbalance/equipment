@@ -8,7 +8,7 @@ TODO describe
 
 >repositories {
 ><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
-><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;maven { url "https://raw.githubusercontent.com/mike-stetsenko/equipment/master/maven-repo" }
+><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;maven { url "https://raw.githubusercontent.com/Softbalance/equipment/master/maven-repo" }
 ><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
 ><br> }
 
