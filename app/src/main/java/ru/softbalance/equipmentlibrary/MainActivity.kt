@@ -6,9 +6,12 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import ru.softbalance.equipment.view.DriverSetupActivity
-import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ATOL
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_SERVER
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
 import ru.softbalance.equipmentlibrary.databinding.ActivityMainBinding
 
 
@@ -23,9 +26,17 @@ class MainActivity : AppCompatActivity() {
 
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
 
-        binding.button.setOnClickListener {
+        binding.buttonAtol.setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
-                    .putExtra(DRIVER_TYPE, DRIVER_TYPE_ATOL), DRIVER_REQUEST)
+                    .putExtra(DRIVER_TYPE_ARG, DRIVER_TYPE_ATOL), DRIVER_REQUEST)
+        }
+
+        binding.buttonPrinter.setOnClickListener {
+            startActivityForResult(Intent(this, DriverSetupActivity::class.java)
+                    .putExtra(DRIVER_TYPE_ARG, DRIVER_TYPE_SERVER)
+                    .putExtra(URL_ARG, "178.170.230.140")
+                    .putExtra(PORT_ARG, 9004),
+                    DRIVER_REQUEST)
         }
     }
 
