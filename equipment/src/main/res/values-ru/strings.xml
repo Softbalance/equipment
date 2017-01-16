@@ -23,7 +23,9 @@
     <string name="model">3. Модель</string>
     <string name="driver">4. Драйвер</string>
     <string name="connect_in_progress">Выполняется подключение …</string>
-    <string name="check_printer">5. Напечатать тестовый чек</string>
+    <string name="check_printer">6. Напечатать тестовый чек</string>
     <string name="no_data">Нет данных</string>
     <string name="wrong_url_format">Неверный формат адреса сервера</string>
+    <string name="save_setting">Сохранить настройки</string>
+    <string name="additional_printing_settings">5. Дополнительные настройки печати</string>
 </resources>

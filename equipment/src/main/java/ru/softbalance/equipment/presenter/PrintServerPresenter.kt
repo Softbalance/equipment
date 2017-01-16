@@ -11,11 +11,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import ru.softbalance.equipment.R
+import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.mapping.jackson.JacksonConfigurator
+import ru.softbalance.equipment.model.printserver.PrintServer
 import ru.softbalance.equipment.model.printserver.api.PrintServerApi
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceDriver
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceModel
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
+import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
 import ru.softbalance.equipment.model.printserver.api.response.settings.SettingsResponse
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
@@ -24,8 +27,10 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
     private var isDeviceRequest: Boolean = false
     private var isModelRequest: Boolean = false
     private var isSettingsRequest: Boolean = false
+    private var isZipSettingsRequest: Boolean = false
     private var isPrintRequest: Boolean = false
     var connectedSuccessful: Boolean = false
+    var printSuccessful: Boolean = false
 
     var settings: String = ""
 
@@ -36,13 +41,17 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
     var drivers: MutableList<PrintDeviceDriver>? = null
     var driver: PrintDeviceDriver? = null
     private var deviceSettings: SettingsResponse? = null
+    private var zipSettings: String? = null
+
+    private var printer: PrintServer? = null
 
     private var deviceRequest: Disposable? = null
     private var modelRequest: Disposable? = null
     private var settingsRequest: Disposable? = null
+    private var zipSettingsRequest: Disposable? = null
 
     private var printAvailable:Boolean = false
-        get() = connectedSuccessful && deviceSettings != null
+        get() = connectedSuccessful && zipSettings != null
 
     var api : PrintServerApi? = null
 
@@ -79,6 +88,7 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
             if (model != null) it.showModel(model!!)
             if (deviceType != null) it.showType(deviceType!!)
             it.showPrintAvailable(printAvailable)
+            it.showPrintState(printSuccessful)
         }
     }
 
@@ -153,7 +163,7 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
         }
     }
 
-    private fun requestSettings(driverId: String) {
+    private fun requestSettings(curDriverId: String) {
 
         if (!isSettingsRequest && context != null && api != null) {
 
@@ -161,7 +171,7 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
 
             view()?.showLoading(context?.getString(R.string.connect_in_progress) ?: "")
 
-            settingsRequest = api!!.getDeviceSettings(driverId)
+            settingsRequest = api!!.getDeviceSettings(curDriverId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnDispose {
@@ -171,6 +181,40 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
                     }
                     .subscribe({
                         deviceSettings = it
+                        view()?.buildSettingsUI(it)
+                        view()?.showConfirm(it.resultInfo)
+                    }, {
+                        view()?.showError(it.toString())
+                    })
+        }
+    }
+
+    fun saveSettings(settingsValues: SettingsValues) {
+        if (!isZipSettingsRequest && context != null && api != null) {
+
+            isZipSettingsRequest = true
+
+            val settingsValues = SettingsValues().apply { // TODO remove
+                driverId = driver?.id ?: ""
+                modelId = model?.id ?: ""
+                typeId = deviceType?.id ?: 0
+                boolValues = deviceSettings!!.boolSettings
+                stringValues = deviceSettings!!.stringSettings
+                listValues = deviceSettings!!.listSettings
+            }
+
+            view()?.showLoading(context?.getString(R.string.connect_in_progress) ?: "")
+
+            zipSettingsRequest = api!!.compressSettings(settingsValues)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnDispose {
+                        isZipSettingsRequest = false
+                        view()?.hideLoading()
+                        view()?.showPrintAvailable(printAvailable)
+                    }
+                    .subscribe({
+                        zipSettings = it.compressedSettings
                         view()?.showConfirm(it.resultInfo)
                     }, {
                         view()?.showError(it.toString())
@@ -179,7 +223,25 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
     }
 
     fun testPrint() {
-        // TODO
+        if(api != null && !isPrintRequest && !zipSettings.isNullOrEmpty()) {
+            printer = PrintServer(api!!, zipSettings ?: "")
+            isPrintRequest = true
+            printer!!.execute(listOf(Task(context!!.getString(R.string.test_print))))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnDispose {
+                        isPrintRequest = false
+                        view()?.hideLoading()
+                        view()?.showPrintAvailable(printAvailable)
+                    }
+                    .subscribe({
+                        printSuccessful = it.isSuccess()
+                        view()?.showConfirm(it.resultInfo)
+                        view()?.showPrintState(printSuccessful)
+                    }, {
+                        view()?.showError(it.toString())
+                    })
+        }
     }
 
     fun getPrintServerUrl(url: String, port: Int): String = "http://$url:$port"

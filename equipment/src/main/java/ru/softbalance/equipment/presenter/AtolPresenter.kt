@@ -12,7 +12,7 @@ import ru.softbalance.equipment.view.fragment.AtolFragment
 
 class AtolPresenter : Presenter<AtolFragment> () {
 
-    private var driver: Atol? = null;
+    private var driver: Atol? = null
     private var isPrinting : Boolean = false
     var printedSuccessful : Boolean = false
 

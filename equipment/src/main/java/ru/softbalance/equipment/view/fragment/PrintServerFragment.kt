@@ -1,24 +1,30 @@
 package ru.softbalance.equipment.view.fragment
 
 import android.os.Bundle
+import android.support.design.widget.TextInputLayout
 import android.support.v4.content.ContextCompat
+import android.text.InputFilter
+import android.text.InputType
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import com.jakewharton.rxbinding.widget.RxTextView
 import okhttp3.HttpUrl
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceDriver
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceModel
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
+import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
+import ru.softbalance.equipment.model.printserver.api.response.settings.*
 import ru.softbalance.equipment.presenter.PresentersCache
 import ru.softbalance.equipment.presenter.PrintServerPresenter
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
 import ru.softbalance.equipment.view.ViewUtils
 import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 class PrintServerFragment : BaseFragment() {
 
@@ -27,6 +33,8 @@ class PrintServerFragment : BaseFragment() {
     }
 
     companion object {
+
+        private val TAG_SETTINGS_MODEL = R.id.settings_id
 
         const val PRESENTER_NAME = "PRINT_SERVER_PRESENTER"
 
@@ -40,6 +48,7 @@ class PrintServerFragment : BaseFragment() {
     }
 
     private var connect: Button? = null
+    private var saveSettings: Button? = null
     private var print: Button? = null
     private var deviceTypes: TextView? = null
     private var deviceModels: TextView? = null
@@ -47,6 +56,8 @@ class PrintServerFragment : BaseFragment() {
 
     private lateinit var url: EditText
     private lateinit var port: EditText
+
+    private lateinit var settings: LinearLayout
 
     private lateinit var presenter: PrintServerPresenter
 
@@ -71,6 +82,8 @@ class PrintServerFragment : BaseFragment() {
         deviceTypes = rootView?.findViewById(R.id.device_type) as TextView
         deviceModels = rootView?.findViewById(R.id.model) as TextView
         deviceDrivers = rootView?.findViewById(R.id.driver) as TextView
+        saveSettings = rootView?.findViewById(R.id.save_settings) as Button
+        settings = rootView?.findViewById(R.id.settings_layout) as LinearLayout
 
         if (savedInstanceState == null) {
             port.setText(arguments.getInt(PORT_ARG).toString())
@@ -84,6 +97,7 @@ class PrintServerFragment : BaseFragment() {
         deviceTypes?.setOnClickListener { selectDevice() }
         deviceModels?.setOnClickListener { selectModel() }
         deviceDrivers?.setOnClickListener { selectDriver() }
+        saveSettings?.setOnClickListener { presenter.saveSettings(SettingsValues()) } // TODO get from UI
         print?.setOnClickListener { presenter.testPrint() }
 
         Observable.combineLatest( // TODO move to javarx2
@@ -164,6 +178,129 @@ class PrintServerFragment : BaseFragment() {
 
             popupMenu.show()
         }
+    }
+
+    fun buildSettingsUI(settingsData: SettingsResponse?) {
+        settings.removeAllViews()
+
+        val inflater = LayoutInflater.from(activity)
+
+        if (settingsData == null) {
+            saveSettings?.isEnabled = false
+        } else {
+            saveSettings?.isEnabled = true
+
+            val settingsPresenters = mutableListOf<Any>()
+            settingsPresenters.addAll(settingsData.boolSettings)
+            settingsPresenters.addAll(settingsData.stringSettings)
+            settingsPresenters.addAll(settingsData.listSettings)
+
+            settingsPresenters.filterNotNull().forEach { inflateSettings(it, inflater) }
+
+            generateSequence(0) {it + 1}.take(settings.childCount-1)
+                    .map { i -> settings.getChildAt(i) }
+                    .filter { v -> v.getTag() != null && v.getTag(TAG_SETTINGS_MODEL) != null }
+                    .map { v ->  v.getTag(TAG_SETTINGS_MODEL)}
+                    .forEach { setupDependencies(it) }
+        }
+    }
+
+    private fun inflateSettings(sp: Any, inflater: LayoutInflater) {
+        when(sp){
+            is BooleanSettingsPresenter -> inflateBooleanSettings(inflater, sp, settings)
+            is StringSettingsPresenter -> inflateStringSettings(inflater, sp, settings)
+            is ListSettingsPresenter -> inflateListSettings(inflater, sp, settings)
+        }
+    }
+
+    private fun inflateBooleanSettings(inflater: LayoutInflater, vp: BooleanSettingsPresenter, container: ViewGroup) {
+        val checkBox = inflater.inflate(R.layout.view_settings_checkbox, container, false) as CheckBox
+        checkBox.apply {
+            text = vp.title
+            isChecked = vp.value ?: false
+            tag = vp.id
+            setTag(TAG_SETTINGS_MODEL, vp)
+            setOnCheckedChangeListener {
+                compoundButton, isChecked -> onBooleanSettingsChecked(compoundButton, isChecked)}
+        }
+        container.addView(checkBox)
+    }
+
+    private fun inflateStringSettings(inflater: LayoutInflater,
+                                      vp: StringSettingsPresenter,
+                                      container: ViewGroup) {
+        val til = inflater.inflate(R.layout.view_settings_edittext, container, false) as TextInputLayout
+        til.tag = vp.id
+        til.setTag(TAG_SETTINGS_MODEL, vp)
+        til.hint = vp.title
+        val editText = til.findViewById(R.id.settings_view) as EditText
+        editText.setText(vp.title)
+
+        if (vp.maxLength > 0) {
+            editText.filters = arrayOf<InputFilter>(android.text.InputFilter.LengthFilter(vp.maxLength))
+        }
+
+        if (vp.isNumber) {
+            editText.inputType = InputType.TYPE_CLASS_NUMBER
+        }
+
+        RxTextView.textChanges(editText)
+                .throttleLast(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe { text ->
+                    vp.value = text.toString()
+                    setupDependencies(vp)
+                }
+
+        container.addView(til)
+    }
+
+    private fun inflateListSettings(inflater: LayoutInflater,
+                                    vp: ListSettingsPresenter,
+                                    container: ViewGroup) {
+        val settingsGroup = inflater.inflate(R.layout.view_settings_list, container, false) as ViewGroup
+        settingsGroup.tag = vp.id
+
+        (settingsGroup.findViewById(R.id.title) as TextView).setText(vp.title)
+
+        val textView = settingsGroup.findViewById(R.id.settings_view) as TextView
+        textView.setTag(TAG_SETTINGS_MODEL, vp)
+
+        vp.values
+                .filterNotNull()
+                .filter({ listValue -> listValue.valueId == vp.value })
+                .first()
+                .let { listValue -> textView.setText(listValue.title) }
+
+        textView.setOnClickListener { it }
+
+        container.addView(settingsGroup)
+    }
+
+    private fun onBooleanSettingsChecked(compoundButton: CompoundButton, isChecked: Boolean) {
+        val bsp = compoundButton.getTag(TAG_SETTINGS_MODEL) as BooleanSettingsPresenter
+        bsp.value = isChecked
+        setupDependencies(bsp)
+    }
+
+    private fun setupDependencies(sp: Any) {
+        when(sp){
+            is BooleanSettingsPresenter -> sp.dependencies
+                    .filter { dep -> dep.values.contains(sp.value) }
+                    .forEach { setupDependency(it) }
+            is StringSettingsPresenter -> sp.dependencies
+                    .filter { dep -> dep.values.contains(sp.value) }
+                    .forEach { setupDependency(it) }
+            is ListSettingsPresenter -> sp.dependencies
+                    .filter { dep -> dep.values.contains(sp.value) }
+                    .forEach { setupDependency(it) }
+        }
+    }
+
+    private fun setupDependency(dep: Dependency<*>) {
+        dep.settingsIds
+                .map({ settingsId -> settings.findViewWithTag(settingsId) })
+                .filterNotNull()
+                .forEach { view -> view.visibility = if (dep.isVisible) View.VISIBLE else View.GONE }
     }
 
     fun showConnectionState(ok: Boolean){

@@ -23,7 +23,9 @@
     <string name="model">3. Model</string>
     <string name="driver">4. Driver</string>
     <string name="connect_in_progress">Connect in progress …</string>
-    <string name="check_printer">5. Check printer</string>
+    <string name="check_printer">6. Check printer</string>
     <string name="no_data">No data</string>
     <string name="wrong_url_format">Wrong url format</string>
+    <string name="save_setting">save_settings</string>
+    <string name="additional_printing_settings">5. Additional printing settings</string>
 </resources>
