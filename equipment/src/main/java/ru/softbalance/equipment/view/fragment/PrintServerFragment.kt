@@ -15,7 +15,6 @@ import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceDriver
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceModel
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
-import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
 import ru.softbalance.equipment.model.printserver.api.response.settings.*
 import ru.softbalance.equipment.presenter.PresentersCache
 import ru.softbalance.equipment.presenter.PrintServerPresenter
@@ -29,7 +28,7 @@ import java.util.concurrent.TimeUnit
 class PrintServerFragment : BaseFragment() {
 
     interface Callback {
-        fun onSettingsSelected(settings: String)
+        fun onSettingsSelected(settings: String, url:String, port:Int)
     }
 
     companion object {
@@ -97,7 +96,7 @@ class PrintServerFragment : BaseFragment() {
         deviceTypes?.setOnClickListener { selectDevice() }
         deviceModels?.setOnClickListener { selectModel() }
         deviceDrivers?.setOnClickListener { selectDriver() }
-        saveSettings?.setOnClickListener { presenter.saveSettings(SettingsValues()) } // TODO get from UI
+        saveSettings?.setOnClickListener { presenter.saveSettings() }
         print?.setOnClickListener { presenter.testPrint() }
 
         Observable.combineLatest( // TODO move to javarx2
@@ -105,30 +104,33 @@ class PrintServerFragment : BaseFragment() {
                 RxTextView.textChanges(port)
         ) { urlValue, portValue -> urlValue.isNotEmpty() && portValue.isNotEmpty() &&
                 HttpUrl.parse(presenter.getPrintServerUrl(urlValue.toString(), portValue.toString().toInt())) != null }
-                .subscribe { enabled ->
-                    connect?.setEnabled(enabled)
-                }
+                .subscribe { enabled -> connect?.isEnabled = enabled }
 
         presenter.bindView(this)
 
         return rootView
     }
 
+    fun updateResult(ok:Boolean){
+        if(ok && hostParent is PrintServerFragment.Callback) {
+            (hostParent as PrintServerFragment.Callback).onSettingsSelected(presenter.zipSettings!!,
+                    presenter.url, presenter.port)
+        }
+    }
+
     private fun selectDevice() {
-        val types = presenter.deviceTypes;
+        val types = presenter.deviceTypes
 
         if (types == null) {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceTypes, 0, false)
-            val menu = popupMenu.getMenu()
             for (i in types.indices) {
-                menu.add(0, i, i, types.get(i).name)
+                popupMenu.menu.add(0, i, i, types[i].name)
             }
 
             popupMenu.setOnMenuItemClickListener({ item ->
-                val deviceType = types.get(item.itemId)
-                presenter.selectDeviceType(deviceType)
+                presenter.selectDeviceType(types[item.itemId])
                 true
             })
 
@@ -143,14 +145,12 @@ class PrintServerFragment : BaseFragment() {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceModels, 0, false)
-            val menu = popupMenu.getMenu()
             for (i in models.indices) {
-                menu.add(0, i, i, models.get(i).name)
+                popupMenu.menu.add(0, i, i, models[i].name)
             }
 
             popupMenu.setOnMenuItemClickListener({ item ->
-                val model = models.get(item.itemId)
-                presenter.selectModel(model)
+                presenter.selectModel(models[item.itemId])
                 true
             })
 
@@ -165,14 +165,12 @@ class PrintServerFragment : BaseFragment() {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceDrivers, 0, false)
-            val menu = popupMenu.getMenu()
             for (i in drivers.indices) {
-                menu.add(0, i, i, drivers.get(i).name)
+                popupMenu.menu.add(0, i, i, drivers[i].name)
             }
 
             popupMenu.setOnMenuItemClickListener({ item ->
-                val driver = drivers.get(item.itemId)
-                presenter.selectDriver(driver)
+                presenter.selectDriver(drivers[item.itemId])
                 true
             })
 
@@ -180,26 +178,21 @@ class PrintServerFragment : BaseFragment() {
         }
     }
 
-    fun buildSettingsUI(settingsData: SettingsResponse?) {
+    fun buildSettingsUI(settingsData: MutableList<SettingsPresenter<*, *>>) {
         settings.removeAllViews()
 
         val inflater = LayoutInflater.from(activity)
 
-        if (settingsData == null) {
+        if (settingsData.isEmpty()) {
             saveSettings?.isEnabled = false
         } else {
             saveSettings?.isEnabled = true
 
-            val settingsPresenters = mutableListOf<Any>()
-            settingsPresenters.addAll(settingsData.boolSettings)
-            settingsPresenters.addAll(settingsData.stringSettings)
-            settingsPresenters.addAll(settingsData.listSettings)
-
-            settingsPresenters.filterNotNull().forEach { inflateSettings(it, inflater) }
+            settingsData.filterNotNull().forEach { inflateSettings(it, inflater) }
 
             generateSequence(0) {it + 1}.take(settings.childCount-1)
                     .map { i -> settings.getChildAt(i) }
-                    .filter { v -> v.getTag() != null && v.getTag(TAG_SETTINGS_MODEL) != null }
+                    .filter { v -> v.tag != null && v.getTag(TAG_SETTINGS_MODEL) != null }
                     .map { v ->  v.getTag(TAG_SETTINGS_MODEL)}
                     .forEach { setupDependencies(it) }
         }
@@ -230,11 +223,13 @@ class PrintServerFragment : BaseFragment() {
                                       vp: StringSettingsPresenter,
                                       container: ViewGroup) {
         val til = inflater.inflate(R.layout.view_settings_edittext, container, false) as TextInputLayout
-        til.tag = vp.id
-        til.setTag(TAG_SETTINGS_MODEL, vp)
-        til.hint = vp.title
+        with(til){
+            tag = vp.id
+            setTag(TAG_SETTINGS_MODEL, vp)
+            hint = vp.title
+        }
         val editText = til.findViewById(R.id.settings_view) as EditText
-        editText.setText(vp.title)
+        editText.setText(vp.value)
 
         if (vp.maxLength > 0) {
             editText.filters = arrayOf<InputFilter>(android.text.InputFilter.LengthFilter(vp.maxLength))
@@ -248,6 +243,7 @@ class PrintServerFragment : BaseFragment() {
                 .throttleLast(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe { text ->
                     vp.value = text.toString()
+                    presenter.saveSettingValue(vp)
                     setupDependencies(vp)
                 }
 
@@ -267,33 +263,54 @@ class PrintServerFragment : BaseFragment() {
 
         vp.values
                 .filterNotNull()
-                .filter({ listValue -> listValue.valueId == vp.value })
+                .filter { listValue -> listValue.valueId == vp.value }
                 .first()
-                .let { listValue -> textView.setText(listValue.title) }
+                .let { listValue -> textView.text = listValue.title }
 
-        textView.setOnClickListener { it }
+        textView.setOnClickListener { onClickListSettings(textView) }
 
         container.addView(settingsGroup)
+    }
+
+    private fun onClickListSettings(view: View) {
+        val vsp = view.getTag(TAG_SETTINGS_MODEL) as ListSettingsPresenter
+
+        val popup = ViewUtils.createPopupMenu(activity, view, 0, false)
+        vsp.values
+                .filterNotNull()
+                .forEach { listValue ->
+                    popup.menu.add(0,
+                            listValue.valueId,
+                            listValue.valueId,
+                            listValue.title)
+                }
+
+        popup.setOnMenuItemClickListener { item ->
+            (view as TextView).text = item.title
+            vsp.value = item.itemId
+            presenter.saveSettingValue(vsp)
+            setupDependencies(vsp)
+            true
+        }
+
+        popup.show()
     }
 
     private fun onBooleanSettingsChecked(compoundButton: CompoundButton, isChecked: Boolean) {
         val bsp = compoundButton.getTag(TAG_SETTINGS_MODEL) as BooleanSettingsPresenter
         bsp.value = isChecked
+        presenter.saveSettingValue(bsp)
         setupDependencies(bsp)
     }
 
     private fun setupDependencies(sp: Any) {
-        when(sp){
-            is BooleanSettingsPresenter -> sp.dependencies
-                    .filter { dep -> dep.values.contains(sp.value) }
-                    .forEach { setupDependency(it) }
-            is StringSettingsPresenter -> sp.dependencies
-                    .filter { dep -> dep.values.contains(sp.value) }
-                    .forEach { setupDependency(it) }
-            is ListSettingsPresenter -> sp.dependencies
-                    .filter { dep -> dep.values.contains(sp.value) }
-                    .forEach { setupDependency(it) }
+        val deps = when(sp){
+            is BooleanSettingsPresenter -> sp.dependencies.filter { dep -> dep.values.contains(sp.value) }
+            is StringSettingsPresenter -> sp.dependencies.filter { dep -> dep.values.contains(sp.value) }
+            is ListSettingsPresenter -> sp.dependencies.filter { dep -> dep.values.contains(sp.value) }
+            else -> emptyList<Dependency<Any>>()
         }
+        deps.forEach { setupDependency(it) }
     }
 
     private fun setupDependency(dep: Dependency<*>) {
@@ -315,7 +332,10 @@ class PrintServerFragment : BaseFragment() {
                 null)
     }
 
-    fun showPrintAvailable(ok: Boolean) = print?.setEnabled(ok)
+    fun showPrintAvailable(ok: Boolean): Unit? {
+        updateResult(ok)
+        return print?.setEnabled(ok)
+    }
 
     fun showType(type : PrintDeviceType) = deviceTypes?.setText(type.name)
 

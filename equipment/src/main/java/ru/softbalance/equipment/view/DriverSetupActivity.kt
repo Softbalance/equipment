@@ -9,7 +9,7 @@ import ru.softbalance.equipment.R
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
-class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
+class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintServerFragment.Callback {
 
     companion object {
         const val DRIVER_TYPE_ARG = "DRIVER_TYPE_ARG"
@@ -23,6 +23,8 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
     }
 
     var settings:String = ""
+    var url:String = ""
+    var port:Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,9 +64,17 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback {
         this.settings = settings
     }
 
+    override fun onSettingsSelected(settings: String, url: String, port: Int) {
+        this.settings = settings
+        this.url = url
+        this.port = port
+    }
+
     override fun onBackPressed() {
         setResult(if (settings.isNotEmpty()) Activity.RESULT_OK else Activity.RESULT_CANCELED,
-                Intent().putExtra(SETTINGS_ARG, settings))
+                Intent().putExtra(SETTINGS_ARG, settings)
+                        .putExtra(URL_ARG, url)
+                        .putExtra(PORT_ARG, port))
         finish()
     }
 }

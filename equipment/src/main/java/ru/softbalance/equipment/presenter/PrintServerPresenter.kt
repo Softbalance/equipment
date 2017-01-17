@@ -19,7 +19,7 @@ import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceDriver
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceModel
 import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
 import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
-import ru.softbalance.equipment.model.printserver.api.response.settings.SettingsResponse
+import ru.softbalance.equipment.model.printserver.api.response.settings.*
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
 class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServerFragment> () {
@@ -41,7 +41,7 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
     var drivers: MutableList<PrintDeviceDriver>? = null
     var driver: PrintDeviceDriver? = null
     private var deviceSettings: SettingsResponse? = null
-    private var zipSettings: String? = null
+    var zipSettings: String? = null
 
     private var printer: PrintServer? = null
 
@@ -87,9 +87,21 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
             if (driver != null) it.showDriver(driver!!)
             if (model != null) it.showModel(model!!)
             if (deviceType != null) it.showType(deviceType!!)
+            if (deviceSettings != null) it.buildSettingsUI(settingsList())
             it.showPrintAvailable(printAvailable)
             it.showPrintState(printSuccessful)
         }
+    }
+
+    private fun settingsList() : MutableList<SettingsPresenter<*, *>>{
+        val settingsPresenters = mutableListOf<SettingsPresenter<*, *>>()
+        deviceSettings?.let {
+            settingsPresenters.addAll(it.boolSettings)
+            settingsPresenters.addAll(it.stringSettings)
+            settingsPresenters.addAll(it.listSettings)
+        }
+
+        return settingsPresenters
     }
 
     override fun unbindView(view: PrintServerFragment) {
@@ -129,6 +141,8 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
                     }
                     .subscribe({
                         connectedSuccessful = it.isSuccess()
+                        this.url = url
+                        this.port = port
                         deviceTypes = it.deviceTypes as MutableList
                         view()?.showConfirm(it.resultInfo)
                     }, {
@@ -181,7 +195,7 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
                     }
                     .subscribe({
                         deviceSettings = it
-                        view()?.buildSettingsUI(it)
+                        view()?.buildSettingsUI(settingsList())
                         view()?.showConfirm(it.resultInfo)
                     }, {
                         view()?.showError(it.toString())
@@ -189,12 +203,12 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
         }
     }
 
-    fun saveSettings(settingsValues: SettingsValues) {
-        if (!isZipSettingsRequest && context != null && api != null) {
+    fun saveSettings() {
+        if (!isZipSettingsRequest && context != null && api != null && deviceSettings != null) {
 
             isZipSettingsRequest = true
 
-            val settingsValues = SettingsValues().apply { // TODO remove
+            val settingsValues = SettingsValues().apply {
                 driverId = driver?.id ?: ""
                 modelId = model?.id ?: ""
                 typeId = deviceType?.id ?: 0
@@ -261,5 +275,21 @@ class PrintServerPresenter(var url: String, var port: Int) : Presenter<PrintServ
         this.driver = driver
         view()?.showDriver(driver)
         requestSettings(driver.id)
+    }
+
+    fun saveSettingValue(vp: SettingsPresenter<*, *>) {
+        deviceSettings?.let {
+            when(vp){
+                is BooleanSettingsPresenter -> it.boolSettings
+                        .filter { set -> vp.id == set.id }
+                        .forEach { set -> set.value = vp.value }
+                is StringSettingsPresenter -> it.stringSettings
+                        .filter { set -> vp.id == set.id }
+                        .forEach { set -> set.value = vp.value }
+                is ListSettingsPresenter -> it.listSettings
+                        .filter { set -> vp.id == set.id }
+                        .forEach { set -> set.value = vp.value }
+            }
+        }
     }
 }
