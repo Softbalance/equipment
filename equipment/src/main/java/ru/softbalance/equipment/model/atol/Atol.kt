@@ -10,15 +10,21 @@ import ru.softbalance.equipment.model.*
 import java.math.BigDecimal
 import java.util.*
 
-class Atol(val context: Context,
+class Atol(context: Context,
            val settings: String) : EcrDriver {
 
     private val driver: IFptr by lazy { prepareDriver() }
 
     private var lastInfo = ""
 
+    private val context: Context
+
     companion object {
         private val RESULT_OK = 0
+    }
+
+    init {
+        this.context = context.applicationContext
     }
 
     override fun execute(tasks: List<Task>): Observable<EquipmentResponse> {
