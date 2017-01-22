@@ -1,6 +1,7 @@
 package ru.softbalance.equipment.presenter
 
 
+import android.content.Context
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -10,28 +11,36 @@ import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.atol.Atol
 import ru.softbalance.equipment.view.fragment.AtolFragment
 
-class AtolPresenter : Presenter<AtolFragment> () {
+class AtolPresenter(context: Context) : Presenter<AtolFragment>(context) {
 
-    private var driver: Atol? = null
-    private var isPrinting : Boolean = false
-    var printedSuccessful : Boolean = false
+    private var driver: Atol
+    private var isPrinting: Boolean = false
+    var printedSuccessful: Boolean = false
 
     var settings: String = ""
+        private set
 
-    private var printTest : Disposable? = null
+    init {
+        driver = Atol(context, settings)
+    }
 
-    override fun bindView(view: AtolFragment){
+    private fun initDriver() {
+        driver.finish()
+        driver = Atol(context, settings)
+    }
+
+    private var printTest: Disposable? = null
+
+    override fun bindView(view: AtolFragment) {
         super.bindView(view)
 
-        driver = Atol(view()!!.activity, settings)
-
         if (isPrinting) {
-            view()?.showLoading(context?.getString(R.string.test_print) ?: "")
+            view.showLoading(context.getString(R.string.test_print))
         } else {
-            view()?.hideLoading()
+            view.hideLoading()
         }
 
-        view()?.showSettingsState(printedSuccessful && settings.isNotEmpty())
+        view.showSettingsState(printedSuccessful && settings.isNotEmpty())
     }
 
     override fun unbindView(view: AtolFragment) {
@@ -45,30 +54,29 @@ class AtolPresenter : Presenter<AtolFragment> () {
     }
 
     fun testPrint() {
-        if (!isPrinting && context != null && driver != null) {
+        if (!isPrinting) {
 
-            view()?.showLoading(context?.getString(R.string.test_print) ?: "")
+            view()?.showLoading(context.getString(R.string.test_print) ?: "")
 
             isPrinting = true
 
-            driver?.finish()
-            driver = Atol(context!!, settings)
-
             val tasks = listOf(
-                    Task(data = context!!.getString(R.string.text_print)),
+                    Task(data = context.getString(R.string.text_print)),
                     Task(type = TaskType.PRINT_HEADER))
 
-            printTest = driver!!.execute(tasks)
+            printTest = driver.execute(tasks)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnDispose {
                         isPrinting = false
                         view()?.hideLoading()
                     }
-                    .subscribe({
-                        printedSuccessful = it.isSuccess()
-                        view()?.showSettingsState(printedSuccessful && settings.isNotEmpty())
-                        view()?.showConfirm(it.resultInfo)
+                    .subscribe({ response ->
+                        printedSuccessful = response.isSuccess()
+                        view()?.let {
+                            it.showSettingsState(printedSuccessful && settings.isNotEmpty())
+                            it.showConfirm(response.resultInfo)
+                        }
                     }, {
                         printedSuccessful = false
                         view()?.showError(it.toString())
@@ -77,10 +85,14 @@ class AtolPresenter : Presenter<AtolFragment> () {
     }
 
     fun startConnection() {
-        if(settings.isNullOrEmpty()) {
-            settings = driver?.getDefaultSettings() ?: ""
+        if (settings.isNullOrEmpty()) {
+            settings = driver.getDefaultSettings()
         }
         view()?.launchConnectionActivity(settings)
     }
 
+    fun updateSettings(settings: String) {
+        this.settings = settings
+        initDriver()
+    }
 }

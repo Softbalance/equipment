@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 class AtolFragment : BaseFragment() {
 
     interface Callback {
-        fun onSettingsSelected(settings : String)
+        fun onSettingsSelected(settings: String)
     }
 
     companion object {
@@ -26,11 +26,11 @@ class AtolFragment : BaseFragment() {
 
         const val REQUEST_CONNECT_DEVICE = 1
 
-        fun newInstance(): AtolFragment = AtolFragment().apply { arguments = Bundle()  }
+        fun newInstance(): AtolFragment = AtolFragment().apply { arguments = Bundle() }
     }
 
-    private var connect : Button? = null
-    private var print : Button? = null
+    private var connect: Button? = null
+    private var print: Button? = null
 
     private lateinit var presenter: AtolPresenter
 
@@ -39,13 +39,13 @@ class AtolFragment : BaseFragment() {
 
         val pr = PresentersCache.get(PRESENTER_NAME)
         presenter = if (pr != null) pr as AtolPresenter else
-            PresentersCache.add(PRESENTER_NAME, AtolPresenter()) as AtolPresenter
+            PresentersCache.add(PRESENTER_NAME, AtolPresenter(activity))
 
         updateResult()
     }
 
-    fun updateResult(){
-        if(presenter.printedSuccessful && presenter.settings.isNotEmpty() && hostParent is Callback) {
+    fun updateResult() {
+        if (presenter.printedSuccessful && presenter.settings.isNotEmpty() && hostParent is Callback) {
             (hostParent as Callback).onSettingsSelected(presenter.settings)
         }
     }
@@ -78,28 +78,28 @@ class AtolFragment : BaseFragment() {
         super.onDestroyView()
     }
 
-    fun showSettingsState(ok: Boolean){
+    fun showSettingsState(ok: Boolean) {
         updateResult()
 
         connect?.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                if (ok) ContextCompat.getDrawable(getActivity(), R.drawable.ic_confirm_selector) else null,
+                if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
                 null)
     }
 
-    fun launchConnectionActivity(settings : String) {
+    fun launchConnectionActivity(settings: String) {
         val intent = Intent(activity, SettingsActivity::class.java)
         intent.putExtra(SettingsActivity.DEVICE_SETTINGS, settings)
         startActivityForResult(intent, AtolFragment.REQUEST_CONNECT_DEVICE)
     }
 
-    fun extractSettings(data: Bundle?): String?  =
-        if (data != null && data.containsKey(SettingsActivity.DEVICE_SETTINGS))
-            data.getString(SettingsActivity.DEVICE_SETTINGS)
-         else null
+    fun extractSettings(data: Bundle?): String? =
+            if (data != null && data.containsKey(SettingsActivity.DEVICE_SETTINGS))
+                data.getString(SettingsActivity.DEVICE_SETTINGS)
+            else null
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == AtolFragment.REQUEST_CONNECT_DEVICE && data.extras != null) {
-            presenter.settings = extractSettings(data.extras) ?: ""
+            presenter.updateSettings(extractSettings(data.extras) ?: "")
             Observable.just(true)
                     .delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                     .doOnNext { presenter.testPrint() }
