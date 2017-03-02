@@ -7,11 +7,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
 import com.atol.drivers.fptr.settings.SettingsActivity
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.presenter.AtolPresenter
 import ru.softbalance.equipment.presenter.PresentersCache
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
+import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
 
 class AtolFragment : BaseFragment() {
@@ -26,7 +27,10 @@ class AtolFragment : BaseFragment() {
 
         const val REQUEST_CONNECT_DEVICE = 1
 
-        fun newInstance(): AtolFragment = AtolFragment().apply { arguments = Bundle() }
+        fun newInstance(settings: String = ""): AtolFragment {
+            val args = Bundle().apply { putString(SETTINGS_ARG, settings) }
+            return AtolFragment().apply { arguments = args }
+        }
     }
 
     private var connect: Button? = null
@@ -39,7 +43,7 @@ class AtolFragment : BaseFragment() {
 
         val pr = PresentersCache.get(PRESENTER_NAME)
         presenter = if (pr != null) pr as AtolPresenter else
-            PresentersCache.add(PRESENTER_NAME, AtolPresenter(activity))
+            PresentersCache.add(PRESENTER_NAME, AtolPresenter(activity, arguments.getString(SETTINGS_ARG)))
 
         updateResult()
     }
@@ -105,5 +109,9 @@ class AtolFragment : BaseFragment() {
                     .doOnNext { presenter.testPrint() }
                     .subscribe({}, Throwable::printStackTrace)
         }
+    }
+
+    override fun getTitle(): String {
+        return getString(R.string.equipment_lib_title_atol)
     }
 }

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ru.softbalance.equipment">
 
-    <application android:theme="@style/AppTheme">
+    <application android:theme="@style/EquipmentLibTheme">
         <activity android:name=".view.DriverSetupActivity" />
     </application>
 

@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.atol.drivers.fptr.Fptr
 import com.atol.drivers.fptr.IFptr
-import io.reactivex.Observable
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.*
+import rx.Observable
 import java.math.BigDecimal
 import java.util.*
 
@@ -21,6 +21,16 @@ class Atol(context: Context,
 
     companion object {
         private val RESULT_OK = 0
+
+        private val TAX_INDEX = 201
+        private val TAX_FIRST = 1
+        private val TAX_LAST = 5
+
+        private val PRINT_STRING_TRAIT = "trait"
+        private val PRINT_STRING_DASH = "dash"
+
+        private val TRAIT_TEMPLATE = "=================================================="
+        private val DASH_TEMPLATE = "--------------------------------------------------"
     }
 
     init {
@@ -31,7 +41,7 @@ class Atol(context: Context,
         return Observable.fromCallable { executeTasksInternal(tasks) }
     }
 
-    fun finish() {
+    override fun finish() {
         try {
             driver.destroy()
         } catch (e: Exception) {
@@ -96,7 +106,7 @@ class Atol(context: Context,
     }
 
     private fun executeTask(task: Task): Boolean {
-        return when (task.type) {
+        return when (task.type.toLowerCase()) {
             TaskType.STRING -> printString(task)
             TaskType.REGISTRATION -> registration(task)
             TaskType.CLOSE_CHECK -> closeCheck()
@@ -110,12 +120,12 @@ class Atol(context: Context,
             TaskType.CLIENT_CONTACT -> setClientContact(task)
             TaskType.REPORT -> report(task)
             TaskType.SYNC_TIME -> syncTime()
-            TaskType.PRINT_HEADER -> printHeader()
-            TaskType.PRINT_FOOTER -> printFooter()
+            TaskType.PRINT_HEADER, TaskType.PRINT_FOOTER -> printHeader()
             TaskType.CUT -> cut()
             else -> {
-                Log.e(Atol::class.java.simpleName, "The operation type ${task.type} isn't supported")
-                return false
+                Log.e(Atol::class.java.simpleName,
+                        context.getString(R.string.equipment_lib_operation_not_supported, task.type))
+                return true
             }
         }
     }
@@ -136,7 +146,9 @@ class Atol(context: Context,
             driver.put_Name(task.data)
         }
 
-        val price = task.params.price
+        driver.put_TextWrap(IFptr.WRAP_WORD)
+
+        val price = task.param.price
         if (price == null || price <= BigDecimal.ZERO) {
             lastInfo = context.getString(R.string.equipment_incorrect_product_price)
             return false
@@ -144,7 +156,7 @@ class Atol(context: Context,
             driver.put_Price(price.toDouble())
         }
 
-        val quantity = task.params.quantity
+        val quantity = task.param.quantity
         if (quantity == null || quantity <= BigDecimal.ZERO) {
             lastInfo = context.getString(R.string.equipment_incorrect_product_quantity)
             return false
@@ -152,7 +164,7 @@ class Atol(context: Context,
             driver.put_Quantity(quantity.toDouble())
         }
 
-        task.params.tax?.let {
+        task.param.tax?.let {
             driver.put_TaxNumber(it)
         }
 
@@ -160,7 +172,7 @@ class Atol(context: Context,
     }
 
     private fun payment(task: Task): Boolean {
-        val sum = task.params.sum ?: BigDecimal.ZERO
+        val sum = task.param.sum ?: BigDecimal.ZERO
         if (sum > BigDecimal.ZERO) {
             driver.put_Summ(sum.toDouble())
         } else {
@@ -168,7 +180,7 @@ class Atol(context: Context,
             return false
         }
 
-        val typeClose = task.params.typeClose
+        val typeClose = task.param.typeClose
         if (typeClose == null) {
             lastInfo = context.getString(R.string.equipment_type_close_incorrect)
             return false
@@ -184,7 +196,9 @@ class Atol(context: Context,
     }
 
     private fun cancelCheck(): Boolean {
-        return driver.CancelCheck().isOK()
+        setMode(IFptr.MODE_REGISTRATION)
+        driver.CancelCheck().isOK()
+        return true
     }
 
     private fun setClientContact(task: Task): Boolean {
@@ -198,7 +212,7 @@ class Atol(context: Context,
         var isOK = false
 
         if (prepareRegistration()) {
-            val amount = task.params.sum ?: BigDecimal.ZERO
+            val amount = task.param.sum ?: BigDecimal.ZERO
             if (amount > BigDecimal.ZERO) {
                 driver.put_Summ(amount.toDouble())
                 when (cashType) {
@@ -221,14 +235,37 @@ class Atol(context: Context,
 
     private fun openCheck(chequeState: Int): Boolean {
         driver.put_CheckType(chequeState)
-        return driver.OpenCheck() === RESULT_OK
+        return driver.OpenCheck() == RESULT_OK
     }
 
     private fun printString(task: Task): Boolean {
-        driver.put_Caption(task.data)
+        val data = task.data.trim()
 
-        val params = task.params
+        if (data.contains(PRINT_STRING_TRAIT, true)) {
+            return printSimpleString(buildSymbolicPrintTask(TRAIT_TEMPLATE))
+        } else if (data.contains(PRINT_STRING_DASH, true)) {
+            return printSimpleString(buildSymbolicPrintTask(DASH_TEMPLATE))
+        }
+
+        return printSimpleString(task)
+    }
+
+    private fun buildSymbolicPrintTask(symbols: String): Task {
+        val task = Task()
+        task.data = symbols
+        return task
+    }
+
+    private fun printSimpleString(task: Task): Boolean {
+        val params = task.param
         driver.put_TextWrap(if (params.wrap ?: false) IFptr.WRAP_WORD else IFptr.WRAP_NONE)
+
+        if (driver._TextWrap == IFptr.WRAP_NONE && task.data.length > driver._CharLineLength) {
+            driver.put_Caption(task.data.substring(0, driver._CharLineLength))
+        } else {
+            driver.put_Caption(task.data)
+        }
+
         driver.put_Alignment(convertAlign(params.alignment ?: Alignment.LEFT))
         driver.put_FontBold(params.bold ?: false)
         driver.put_FontItalic(params.italic ?: false)
@@ -269,7 +306,7 @@ class Atol(context: Context,
         cancelCheck()
 
         val mode: Int
-        if (task.params.reportType == ReportType.REPORT_Z) {
+        if (task.param.reportType == ReportType.REPORT_Z) {
             mode = IFptr.MODE_REPORT_CLEAR
         } else {
             mode = IFptr.MODE_REPORT_NO_CLEAR
@@ -281,14 +318,14 @@ class Atol(context: Context,
 
         val reportType: Int
 
-        when (task.params.reportType) {
+        when (task.param.reportType) {
             ReportType.REPORT_Z -> reportType = IFptr.REPORT_Z
             ReportType.REPORT_X -> reportType = IFptr.REPORT_X
             ReportType.REPORT_DEPARTMENT -> reportType = IFptr.REPORT_DEPARTMENTS
             ReportType.REPORT_CASHIERS -> reportType = IFptr.REPORT_CASHIERS
             ReportType.REPORT_HOURS -> reportType = IFptr.REPORT_HOURS
             else -> {
-                Log.e(Atol::class.java.simpleName, "The report operation ${task.params.reportType} isn't supported")
+                Log.e(Atol::class.java.simpleName, "The report operation ${task.param.reportType} isn't supported")
                 return false
             }
         }
@@ -323,6 +360,34 @@ class Atol(context: Context,
 
     fun getDefaultSettings(): String {
         return driver._DeviceSettings
+    }
+
+    fun getTaxes(): Observable<List<Tax>> {
+        return Observable.fromCallable { getTaxesInternal() }
+    }
+
+    private fun getTaxesInternal(): List<Tax> {
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            throw RuntimeException(getInfo())
+        }
+
+        if (!setMode(IFptr.MODE_PROGRAMMING)) {
+            throw RuntimeException(getInfo())
+        }
+
+        val taxes = TAX_FIRST.rangeTo(TAX_LAST)
+                .map { index ->
+                    Tax().apply {
+                        id = index.toLong()
+                        driver.put_CaptionPurpose(index + TAX_INDEX)
+                        driver.GetCaption()
+                        title = driver._Caption
+                    }
+                }
+
+        driver.put_DeviceEnabled(false)
+
+        return taxes
     }
 }
 

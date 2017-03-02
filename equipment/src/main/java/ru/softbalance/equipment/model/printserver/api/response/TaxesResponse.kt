@@ -1,7 +1,7 @@
 package ru.softbalance.equipment.model.printserver.api.response
 
 import ru.softbalance.equipment.model.EquipmentResponse
-import ru.softbalance.equipment.model.printserver.api.model.Tax
+import ru.softbalance.equipment.model.Tax
 
 class TaxesResponse : EquipmentResponse() {
 

@@ -1,12 +1,13 @@
 package ru.softbalance.equipment.view.fragment
 
+import android.app.ProgressDialog
 import android.support.v4.app.Fragment
 import android.widget.Toast
 import ru.ktoddler.view.View
 
 abstract class BaseFragment : Fragment(), View {
 
-    private var progressDialog : ProgressDialogFragment? = null
+    private var progressDialog: ProgressDialog? = null
 
     protected val hostParent: Any?
         get() {
@@ -36,21 +37,22 @@ abstract class BaseFragment : Fragment(), View {
 
     override fun showConfirm(confirm: String) = toast(confirm)
 
-    private fun getShowingDialog() : Fragment? =
-            childFragmentManager.findFragmentByTag(ProgressDialogFragment::class.java.simpleName)
-
     override fun showLoading(info: String) {
-        if (getShowingDialog() == null) {
-            childFragmentManager.beginTransaction().let {
-                it.add(ProgressDialogFragment.spinner(info), ProgressDialogFragment::class.java.simpleName)
-                it.commitAllowingStateLoss()
-            }
+        hideLoading()
+
+        progressDialog = ProgressDialog(activity).apply {
+            setMessage(info)
+            isIndeterminate = true
+            setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            setCancelable(false)
+            show()
         }
+
     }
 
     override fun hideLoading() {
-         if(getShowingDialog() != null){
-            (getShowingDialog() as ProgressDialogFragment).dismissAllowingStateLoss()
-        }
+        progressDialog?.dismiss()
     }
+
+    abstract fun getTitle(): String
 }

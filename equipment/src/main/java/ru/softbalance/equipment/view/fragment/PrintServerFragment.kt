@@ -18,7 +18,10 @@ import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
 import ru.softbalance.equipment.model.printserver.api.response.settings.*
 import ru.softbalance.equipment.presenter.PresentersCache
 import ru.softbalance.equipment.presenter.PrintServerPresenter
+import ru.softbalance.equipment.toHttpUrl
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.EQUIPMENT_TYPE_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
 import ru.softbalance.equipment.view.ViewUtils
 import rx.Observable
@@ -28,7 +31,10 @@ import java.util.concurrent.TimeUnit
 class PrintServerFragment : BaseFragment() {
 
     interface Callback {
-        fun onSettingsSelected(settings: String, url: String, port: Int)
+        fun onSettingsSelected(settings: String,
+                               url: String,
+                               port: Int,
+                               type: Int)
     }
 
     companion object {
@@ -37,10 +43,15 @@ class PrintServerFragment : BaseFragment() {
 
         const val PRESENTER_NAME = "PRINT_SERVER_PRESENTER"
 
-        fun newInstance(url: String, port: Int): PrintServerFragment {
+        fun newInstance(url: String = "",
+                        port: Int = 0,
+                        type: Int = 0,
+                        settings: String = ""): PrintServerFragment {
             val args = Bundle().apply {
                 putString(URL_ARG, url)
                 putInt(PORT_ARG, port)
+                putInt(EQUIPMENT_TYPE_ARG, type)
+                putString(SETTINGS_ARG, settings)
             }
             return PrintServerFragment().apply { arguments = args }
         }
@@ -63,10 +74,16 @@ class PrintServerFragment : BaseFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val pr = PresentersCache.get(PRESENTER_NAME)
-        presenter = if (pr != null) pr as PrintServerPresenter else
-            PresentersCache.add(PRESENTER_NAME,
-                    PrintServerPresenter(activity, arguments.getString(URL_ARG), arguments.getInt(PORT_ARG)))
+        var pr = PresentersCache.get(PRESENTER_NAME)
+        if (pr == null) {
+            pr = PrintServerPresenter(activity,
+                    arguments.getString(URL_ARG),
+                    arguments.getInt(PORT_ARG),
+                    arguments.getString(SETTINGS_ARG))
+
+            PresentersCache.add(PRESENTER_NAME, pr)
+        }
+        presenter = pr as PrintServerPresenter
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
@@ -89,21 +106,19 @@ class PrintServerFragment : BaseFragment() {
         connect = rootView.findViewById(R.id.connect) as Button
         print = rootView.findViewById(R.id.testPrint) as Button
 
-        connect.setOnClickListener { presenter.getDevices(url.text.toString(), port.text.toString().toInt()) }
+        connect.setOnClickListener { presenter.connect(url.text.toString(), port.text.toString().toInt()) }
         deviceTypes.setOnClickListener { selectDevice() }
         deviceModels.setOnClickListener { selectModel() }
         deviceDrivers.setOnClickListener { selectDriver() }
         saveSettings.setOnClickListener { presenter.saveSettings() }
         print.setOnClickListener { presenter.testPrint() }
 
-        Observable.combineLatest(// TODO move to javarx2
-                RxTextView.textChanges(url),
-                RxTextView.textChanges(port)
-        ) { urlValue, portValue ->
-            urlValue.isNotEmpty() && portValue.isNotEmpty() &&
-                    HttpUrl.parse(presenter.getPrintServerUrl(urlValue.toString(), portValue.toString().toInt())) != null
-        }
-                .subscribe { enabled -> connect.isEnabled = enabled }
+        Observable.combineLatest(RxTextView.textChanges(url), RxTextView.textChanges(port)) {
+            urlValue, portValue ->
+            urlValue.isNotEmpty()
+                    && portValue.isNotEmpty()
+                    && HttpUrl.parse(urlValue.toString().toHttpUrl(portValue.toString().toInt())) != null
+        }.subscribe { enabled -> connect.isEnabled = enabled }
 
         presenter.bindView(this)
 
@@ -115,7 +130,10 @@ class PrintServerFragment : BaseFragment() {
             val callback = hostParent ?: return
             val settings = presenter.zipSettings ?: return
             if (callback is PrintServerFragment.Callback) {
-                callback.onSettingsSelected(settings, presenter.url, presenter.port)
+                callback.onSettingsSelected(settings,
+                        presenter.url,
+                        presenter.port,
+                        presenter.deviceType?.id ?: arguments.getInt(EQUIPMENT_TYPE_ARG))
             }
         }
     }
@@ -123,7 +141,7 @@ class PrintServerFragment : BaseFragment() {
     private fun selectDevice() {
         val types = presenter.deviceTypes
 
-        if (types == null) {
+        if (types.isEmpty()) {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceTypes, 0, false)
@@ -143,7 +161,7 @@ class PrintServerFragment : BaseFragment() {
     private fun selectModel() {
         val models = presenter.models
 
-        if (models == null) {
+        if (models.isEmpty()) {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceModels, 0, false)
@@ -163,7 +181,7 @@ class PrintServerFragment : BaseFragment() {
     private fun selectDriver() {
         val drivers = presenter.drivers
 
-        if (drivers == null) {
+        if (drivers.isEmpty()) {
             showError(getString(R.string.no_data))
         } else {
             val popupMenu = ViewUtils.createPopupMenu(activity, deviceDrivers, 0, false)
@@ -364,5 +382,9 @@ class PrintServerFragment : BaseFragment() {
     override fun onDestroyView() {
         presenter.unbindView(this)
         super.onDestroyView()
+    }
+
+    override fun getTitle(): String {
+        return getString(R.string.equipment_lib_title_print_server)
     }
 }

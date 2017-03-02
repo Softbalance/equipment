@@ -5,6 +5,8 @@ import ru.softbalance.equipment.model.EquipmentResponse
 
 class SettingsResponse : EquipmentResponse() {
 
+    var typeId = 0
+
     var driverId = ""
 
     var modelId = ""

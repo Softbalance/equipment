@@ -28,4 +28,7 @@
     <string name="wrong_url_format">Неверный формат адреса сервера</string>
     <string name="save_setting">Сохранить настройки</string>
     <string name="additional_printing_settings">5. Дополнительные настройки печати</string>
+    <string name="equipment_lib_title_atol">Оборудование АТОЛ</string>
+    <string name="equipment_lib_title_print_server">Сервер печати</string>
+    <string name="equipment_lib_operation_not_supported">Операция %1$s не поддерживается</string>
 </resources>

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:fillViewport="true"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:fillViewport="true">
 
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/light_grey"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/connection_address"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -76,13 +76,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/device_type_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/device_type"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -103,14 +104,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/light_grey"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/model_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/model"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -130,13 +131,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/driver_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/driver"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -156,14 +158,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/light_grey"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/additional_printing_settings"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -187,13 +189,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_grey"
                 android:text="@string/check_printer"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
+
             <Button
                 android:id="@+id/testPrint"
                 android:layout_width="match_parent"

@@ -2,52 +2,52 @@ package ru.softbalance.equipment.presenter
 
 
 import android.content.Context
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import ru.softbalance.equipment.R
+import ru.softbalance.equipment.isActive
 import ru.softbalance.equipment.model.Task
+import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.mapping.jackson.JacksonConfigurator
 import ru.softbalance.equipment.model.printserver.PrintServer
 import ru.softbalance.equipment.model.printserver.api.PrintServerApi
-import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceDriver
-import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceModel
-import ru.softbalance.equipment.model.printserver.api.model.PrintDeviceType
-import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
+import ru.softbalance.equipment.model.printserver.api.model.*
 import ru.softbalance.equipment.model.printserver.api.response.settings.*
+import ru.softbalance.equipment.toHttpUrl
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
+import rx.Subscription
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 
-class PrintServerPresenter(context: Context, var url: String, var port: Int) : Presenter<PrintServerFragment>(context) {
+class PrintServerPresenter(context: Context,
+                           var url: String,
+                           var port: Int,
+                           var zipSettings: String? = null) : Presenter<PrintServerFragment>(context) {
 
-    private var isDeviceRequest: Boolean = false
-    private var isModelRequest: Boolean = false
-    private var isSettingsRequest: Boolean = false
-    private var isZipSettingsRequest: Boolean = false
-    private var isPrintRequest: Boolean = false
     var connectedSuccessful: Boolean = false
     var printSuccessful: Boolean = false
 
     var settings: String = ""
 
-    var deviceTypes: MutableList<PrintDeviceType>? = null
+    var deviceTypes = emptyList<PrintDeviceType>()
+
     var deviceType: PrintDeviceType? = null
-    var models: MutableList<PrintDeviceModel>? = null
+    var models = emptyList<PrintDeviceModel>()
     private var model: PrintDeviceModel? = null
-    var drivers: MutableList<PrintDeviceDriver>? = null
+    var drivers = emptyList<PrintDeviceDriver>()
     var driver: PrintDeviceDriver? = null
     private var deviceSettings: SettingsResponse? = null
-    var zipSettings: String? = null
 
-    private var deviceRequest: Disposable? = null
-    private var modelRequest: Disposable? = null
-    private var settingsRequest: Disposable? = null
-    private var zipSettingsRequest: Disposable? = null
+    private var restoreSettingsRequest: Subscription? = null
+    private var deviceRequest: Subscription? = null
+    private var modelRequest: Subscription? = null
+    private var settingsRequest: Subscription? = null
+    private var zipSettingsRequest: Subscription? = null
+    private var printRequest: Subscription? = null
 
     private fun isPrintAvailable(): Boolean {
         return connectedSuccessful && zipSettings != null
@@ -56,11 +56,11 @@ class PrintServerPresenter(context: Context, var url: String, var port: Int) : P
     val api: PrintServerApi
         get() {
             return Retrofit.Builder()
-                    .baseUrl(getPrintServerUrl(url, port))
+                    .baseUrl(url.toHttpUrl(port))
                     .client(OkHttpClient.Builder()
                             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                             .build())
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                     .addConverterFactory(JacksonConverterFactory.create(JacksonConfigurator.build()))
                     .build()
                     .create(PrintServerApi::class.java)
@@ -70,7 +70,13 @@ class PrintServerPresenter(context: Context, var url: String, var port: Int) : P
         super.bindView(view)
 
         view()?.let {
-            if (isDeviceRequest) {
+            if (restoreSettingsRequest.isActive()
+                    || deviceRequest.isActive()
+                    || modelRequest.isActive()
+                    || settingsRequest.isActive()
+                    || zipSettingsRequest.isActive()) {
+                it.showLoading(context.getString(R.string.connect_in_progress))
+            } else if (printRequest.isActive()) {
                 it.showLoading(context.getString(R.string.test_print))
             } else {
                 it.hideLoading()
@@ -104,173 +110,160 @@ class PrintServerPresenter(context: Context, var url: String, var port: Int) : P
     }
 
     override fun unbindView(view: PrintServerFragment) {
-        view()?.hideLoading()
+        hideLoading()
 
         super.unbindView(view)
     }
 
     override fun onFinish() {
-        deviceRequest?.dispose()
+        deviceRequest?.unsubscribe()
     }
 
-    fun getDevices(url: String, port: Int) {
+    fun getDevices() {
 
-        this.url = url
-        this.port = port
+        if (deviceRequest.isActive()) return
 
-        val baseUrl: String = getPrintServerUrl(url, port)
-
-        if (!isDeviceRequest) {
-
-            if (HttpUrl.parse(baseUrl) == null) {
-                view()?.showError(context.getString(R.string.wrong_url_format))
-                return
-            }
-
-            isDeviceRequest = true
-
-            view()?.showLoading(context.getString(R.string.connect_in_progress))
-
-            deviceRequest = api.getDeviceTypes()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isDeviceRequest = false
-                        view()?.let {
-                            it.hideLoading()
-                            it.showConnectionState(connectedSuccessful)
-                        }
-                    }
-                    .subscribe({
-                        connectedSuccessful = it.isSuccess()
-                        this.url = url
-                        this.port = port
-                        deviceTypes = it.deviceTypes as MutableList
-                        view()?.showConfirm(it.resultInfo)
-                    }, {
-                        connectedSuccessful = false
-                        view()?.showError(it.toString())
-                    })
+        if (HttpUrl.parse(url.toHttpUrl(port)) == null) {
+            view()?.showError(context.getString(R.string.wrong_url_format))
+            return
         }
+
+        showProgress()
+
+        deviceRequest = api.getDeviceTypes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.let {
+                        it.hideLoading()
+                        it.showConnectionState(connectedSuccessful)
+                    }
+                }
+                .subscribe({
+                    connectedSuccessful = it.isSuccess()
+                    deviceTypes = it.deviceTypes
+                    view()?.showConfirm(it.resultInfo)
+                }, {
+                    connectedSuccessful = false
+                    view()?.showError(it.toString())
+                })
     }
 
     fun getModelsAndDrivers(deviceTypeId: Int) {
 
-        if (!isModelRequest) {
-
-            isModelRequest = true
-
-            view()?.showLoading(context.getString(R.string.connect_in_progress))
-
-            modelRequest = api.getModels(deviceTypeId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isModelRequest = false
-                        view()?.hideLoading()
-                    }
-                    .subscribe({
-                        models = it.models as MutableList
-                        drivers = it.drivers as MutableList
-                        view()?.showConfirm(it.resultInfo)
-                    }, {
-                        view()?.showError(it.toString())
-                    })
+        if (modelRequest.isActive()) {
+            return
         }
+
+        showProgress()
+
+        modelRequest = api.getModels(deviceTypeId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe { hideLoading() }
+                .subscribe({
+                    models = it.models
+                    drivers = it.drivers
+                    view()?.showConfirm(it.resultInfo)
+                }, {
+                    view()?.showError(it.toString())
+                })
     }
 
     private fun requestSettings(curDriverId: String) {
 
-        if (!isSettingsRequest) {
-
-            isSettingsRequest = true
-
-            view()?.showLoading(context.getString(R.string.connect_in_progress))
-
-            settingsRequest = api.getDeviceSettings(curDriverId)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isSettingsRequest = false
-                        view()?.let {
-                            it.hideLoading()
-                            it.showPrintAvailable(isPrintAvailable())
-                        }
-                    }
-                    .subscribe({ settings ->
-                        deviceSettings = settings
-                        view()?.let {
-                            it.buildSettingsUI(settingsList())
-                            it.showConfirm(settings.resultInfo)
-                        }
-                    }, {
-                        view()?.showError(it.toString())
-                    })
+        if (settingsRequest.isActive()) {
+            return
         }
+
+        showProgress()
+
+        settingsRequest = api.getDeviceSettings(curDriverId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.let {
+                        it.hideLoading()
+                        it.showPrintAvailable(isPrintAvailable())
+                    }
+                }
+                .subscribe({ settings ->
+                    deviceSettings = settings
+                    view()?.let {
+                        it.buildSettingsUI(settingsList())
+                        it.showConfirm(settings.resultInfo)
+                    }
+                }, {
+                    view()?.showError(it.toString())
+                })
     }
 
     fun saveSettings() {
         val settings = deviceSettings ?: return
-        if (!isZipSettingsRequest) {
-            isZipSettingsRequest = true
-
-            val settingsValues = SettingsValues().apply {
-                driverId = driver?.id ?: ""
-                modelId = model?.id ?: ""
-                typeId = deviceType?.id ?: 0
-                boolValues = settings.boolSettings
-                stringValues = settings.stringSettings
-                listValues = settings.listSettings
-            }
-
-            view()?.showLoading(context.getString(R.string.connect_in_progress))
-
-            zipSettingsRequest = api.compressSettings(settingsValues)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isZipSettingsRequest = false
-                        view()?.let {
-                            it.hideLoading()
-                            it.showPrintAvailable(isPrintAvailable())
-                        }
-                    }
-                    .subscribe({
-                        zipSettings = it.compressedSettings
-                        view()?.showConfirm(it.resultInfo)
-                    }, {
-                        view()?.showError(it.toString())
-                    })
+        if (zipSettingsRequest.isActive()) {
+            return
         }
+
+        val settingsValues = SettingsValues().apply {
+            driverId = driver?.id ?: ""
+            modelId = model?.id ?: ""
+            typeId = deviceType?.id ?: 0
+            boolValues = settings.boolSettings
+            stringValues = settings.stringSettings
+            listValues = settings.listSettings
+        }
+
+        showProgress()
+
+        zipSettingsRequest = api.compressSettings(settingsValues)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.let {
+                        it.hideLoading()
+                        it.showPrintAvailable(isPrintAvailable())
+                    }
+                }
+                .subscribe({
+                    zipSettings = it.compressedSettings
+                    view()?.showConfirm(it.resultInfo)
+                }, {
+                    view()?.showError(it.toString())
+                })
     }
 
     fun testPrint() {
-        if (!isPrintRequest && !zipSettings.isNullOrEmpty()) {
-            val printer = PrintServer(api, zipSettings ?: "")
-            isPrintRequest = true
-            printer.execute(listOf(Task(context.getString(R.string.test_print))))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isPrintRequest = false
-                        view()?.let {
-                            it.hideLoading()
-                            it.showPrintAvailable(isPrintAvailable())
-                        }
-                    }
-                    .subscribe({ response ->
-                        printSuccessful = response.isSuccess()
-                        view()?.let {
-                            it.showConfirm(response.resultInfo)
-                            it.showPrintState(printSuccessful)
-                        }
-                    }, {
-                        view()?.showError(it.toString())
-                    })
+        if (printRequest.isActive() || zipSettings.isNullOrEmpty()) {
+            return
         }
-    }
 
-    fun getPrintServerUrl(url: String, port: Int): String = "http://$url:$port"
+        val printTasks = listOf(
+                Task().apply { data = context.getString(R.string.test_print) },
+                Task().apply { type = TaskType.PRINT_FOOTER },
+                Task().apply { type = TaskType.CUT })
+
+        view()?.showLoading(context.getString(R.string.test_print))
+
+        printRequest = PrintServer(url, port, zipSettings ?: "")
+                .execute(printTasks)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.let {
+                        it.hideLoading()
+                        it.showPrintAvailable(isPrintAvailable())
+                    }
+                }
+                .subscribe({ response ->
+                    printSuccessful = response.isSuccess()
+                    view()?.let {
+                        it.showConfirm(response.resultInfo)
+                        it.showPrintState(printSuccessful)
+                    }
+                }, {
+                    view()?.showError(it.toString())
+                })
+    }
 
     fun selectDeviceType(deviceType: PrintDeviceType) {
         this.deviceType = deviceType
@@ -304,4 +297,86 @@ class PrintServerPresenter(context: Context, var url: String, var port: Int) : P
             }
         }
     }
+
+    fun connect(url: String, port: Int) {
+        updateUrlAndPort(url, port)
+        if (zipSettings.isNullOrEmpty()) {
+            getDevices()
+        } else {
+            restoreSettings()
+        }
+    }
+
+    private fun updateUrlAndPort(url: String, port: Int) {
+        var requiredUpdateSettings = false
+        if (!this.url.equals(url, true)) {
+            this.url = url
+            requiredUpdateSettings = true
+        }
+
+        if (this.port != port) {
+            this.port = port
+            requiredUpdateSettings = true
+        }
+
+        if (requiredUpdateSettings) {
+            zipSettings = null
+        }
+    }
+
+    private fun restoreSettings() {
+        if (restoreSettingsRequest.isActive()) {
+            return
+        }
+
+        showProgress()
+
+        val printServerApi = api
+        restoreSettingsRequest = printServerApi.extractDeviceSettings(CompressedSettings.create(zipSettings))
+                .subscribeOn(Schedulers.io())
+                .doOnUnsubscribe {
+                    hideLoading()
+                }
+                .doOnNext { response ->
+                    deviceSettings = response
+                }
+                .flatMap { printServerApi.getDeviceTypes() }
+                .flatMap {
+                    deviceTypes = it.deviceTypes
+                    printServerApi.getModels(deviceSettings!!.typeId)
+                }
+                .doOnNext {
+                    models = it.models
+                    drivers = it.drivers
+                    restoreSettingsState()
+
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ response ->
+                    connectedSuccessful = response.isSuccess()
+                    view()?.let {
+                        it.hideLoading()
+                        it.showConfirm(response.resultInfo)
+                    }
+                    hideLoading()
+                    restoreUiState()
+                }, { view()?.showError(it.toString()) })
+    }
+
+    private fun hideLoading() {
+        view()?.hideLoading()
+    }
+
+    private fun restoreSettingsState() {
+        deviceSettings?.let { ds ->
+            deviceType = deviceTypes.find { it.id == ds.typeId }
+            model = models.find { it.id == ds.modelId }
+            driver = drivers.find { it.id == ds.driverId }
+        }
+    }
+
+    private fun showProgress() {
+        view()?.showLoading(context.getString(R.string.connect_in_progress))
+    }
 }
+

@@ -26,22 +26,22 @@ import java.lang.annotation.RetentionPolicy;
         TaskType.CUT})
 public @interface TaskType {
 
-    String STRING = "String";
-    String BARCODE = "BarCode";
-    String IMAGE = "Image";
-    String REGISTRATION = "Registration";
-    String CLOSE_CHECK = "CloseCheck";
-    String CANCEL_CHECK = "CancelCheck";
-    String OPEN_CHECK_SELL = "OpenCheckSell";
-    String PAYMENT = "Payment";
-    String OPEN_CHECK_RETURN = "OpenCheckReturn";
-    String RETURN = "Return";
-    String CASH_INCOME = "CashIncome";
-    String CASH_OUTCOME = "CashOutcome";
-    String CLIENT_CONTACT = "ClientContact";
-    String REPORT = "Report";
-    String SYNC_TIME = "SyncTime";
-    String PRINT_HEADER = "PrintHeader";
-    String PRINT_FOOTER = "PrintFooter";
-    String CUT = "Cut";
+    String STRING = "string";
+    String BARCODE = "barcode";
+    String IMAGE = "image";
+    String REGISTRATION = "registration";
+    String CLOSE_CHECK = "closecheck";
+    String CANCEL_CHECK = "cancelcheck";
+    String OPEN_CHECK_SELL = "openchecksell";
+    String PAYMENT = "payment";
+    String OPEN_CHECK_RETURN = "opencheckreturn";
+    String RETURN = "return";
+    String CASH_INCOME = "cashincome";
+    String CASH_OUTCOME = "cashoutcome";
+    String CLIENT_CONTACT = "clientcontact";
+    String REPORT = "report";
+    String SYNC_TIME = "synctime";
+    String PRINT_HEADER = "printheader";
+    String PRINT_FOOTER = "printfooter";
+    String CUT = "cut";
 }

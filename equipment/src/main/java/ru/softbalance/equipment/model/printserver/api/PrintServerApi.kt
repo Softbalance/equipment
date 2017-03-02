@@ -1,6 +1,5 @@
 package ru.softbalance.equipment.model.printserver.api
 
-import io.reactivex.Observable
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -11,6 +10,7 @@ import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
 import ru.softbalance.equipment.model.printserver.api.model.TasksRequest
 import ru.softbalance.equipment.model.printserver.api.response.*
 import ru.softbalance.equipment.model.printserver.api.response.settings.SettingsResponse
+import rx.Observable
 
 interface PrintServerApi {
 

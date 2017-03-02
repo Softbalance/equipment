@@ -2,25 +2,26 @@ package ru.softbalance.equipment.presenter
 
 
 import android.content.Context
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import ru.softbalance.equipment.R
+import ru.softbalance.equipment.isActive
 import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.atol.Atol
 import ru.softbalance.equipment.view.fragment.AtolFragment
+import rx.Subscription
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 
-class AtolPresenter(context: Context) : Presenter<AtolFragment>(context) {
+class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment>(context) {
 
     private var driver: Atol
-    private var isPrinting: Boolean = false
     var printedSuccessful: Boolean = false
 
     var settings: String = ""
         private set
 
     init {
+        this.settings = settings
         driver = Atol(context, settings)
     }
 
@@ -29,12 +30,12 @@ class AtolPresenter(context: Context) : Presenter<AtolFragment>(context) {
         driver = Atol(context, settings)
     }
 
-    private var printTest: Disposable? = null
+    private var printTest: Subscription? = null
 
     override fun bindView(view: AtolFragment) {
         super.bindView(view)
 
-        if (isPrinting) {
+        if (printTest.isActive()) {
             view.showLoading(context.getString(R.string.test_print))
         } else {
             view.hideLoading()
@@ -50,38 +51,40 @@ class AtolPresenter(context: Context) : Presenter<AtolFragment>(context) {
     }
 
     override fun onFinish() {
-        printTest?.dispose()
+        printTest?.unsubscribe()
     }
 
     fun testPrint() {
-        if (!isPrinting) {
-
-            view()?.showLoading(context.getString(R.string.test_print) ?: "")
-
-            isPrinting = true
-
-            val tasks = listOf(
-                    Task(data = context.getString(R.string.text_print)),
-                    Task(type = TaskType.PRINT_HEADER))
-
-            printTest = driver.execute(tasks)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnDispose {
-                        isPrinting = false
-                        view()?.hideLoading()
-                    }
-                    .subscribe({ response ->
-                        printedSuccessful = response.isSuccess()
-                        view()?.let {
-                            it.showSettingsState(printedSuccessful && settings.isNotEmpty())
-                            it.showConfirm(response.resultInfo)
-                        }
-                    }, {
-                        printedSuccessful = false
-                        view()?.showError(it.toString())
-                    })
+        if (printTest.isActive()) {
+            return
         }
+
+        view()?.showLoading(context.getString(R.string.test_print) ?: "")
+
+        val tasks = listOf(
+                Task().apply { data = context.getString(R.string.text_print) },
+                Task().apply { type = TaskType.PRINT_HEADER })
+
+        printTest = driver.execute(tasks)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.hideLoading()
+                }
+                .subscribe({ response ->
+                    printedSuccessful = response.isSuccess()
+                    view()?.let {
+                        if (printedSuccessful && settings.isNotEmpty()) {
+                            it.showSettingsState(true)
+                            it.showConfirm("OK")
+                        } else {
+                            it.showError(response.resultInfo)
+                        }
+                    }
+                }, {
+                    printedSuccessful = false
+                    view()?.showError(it.toString())
+                })
     }
 
     fun startConnection() {

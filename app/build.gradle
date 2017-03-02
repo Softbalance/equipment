@@ -63,7 +63,7 @@ android {
 
     applicationVariants.all { variant ->
 
-        def filename = "ktoddler-${variant.baseName}-${versionName}.apk"
+        def filename = "equipment_test-${variant.baseName}-${versionName}.apk"
 
         variant.outputs.each { output ->
             output.outputFile = new File(output.outputFile.parent, filename)
@@ -94,7 +94,7 @@ kapt {
     generateStubs = true
 }
 
-def supportVers = '25.1.0'
+def supportVers = '25.2.0'
 def mockitoVers = '2.4.2'
 
 dependencies {
