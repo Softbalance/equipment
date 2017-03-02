@@ -3,7 +3,7 @@ package ru.softbalance.equipment.view.fragment
 import android.app.ProgressDialog
 import android.support.v4.app.Fragment
 import android.widget.Toast
-import ru.ktoddler.view.View
+import ru.softbalance.equipment.view.View
 
 abstract class BaseFragment : Fragment(), View {
 

@@ -1,4 +1,4 @@
-package ru.ktoddler.view
+package ru.softbalance.equipment.view
 
 interface View {
 
