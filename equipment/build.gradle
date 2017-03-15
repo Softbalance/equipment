@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven'
 
-def currentVersion = '1.1.0'
+def currentVersion = '1.2.0'
 
 android {
     compileSdkVersion 25
@@ -107,7 +107,7 @@ dependencies {
     compile 'com.google.android:flexbox:0.2.3'
 
     // atol driver
-    compile 'ru.softbalance.hardware:atolprinter:9.8.0.5103'
+    compile 'ru.softbalance.hardware:atolprinter:9.8.1.5159'
 
     // Testing
     kaptTest "com.google.dagger:dagger-compiler:$daggerVers"
