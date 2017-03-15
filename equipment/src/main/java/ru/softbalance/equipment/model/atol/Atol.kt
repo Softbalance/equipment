@@ -116,7 +116,7 @@ class Atol(context: Context,
             TaskType.OPEN_CHECK_RETURN -> openCheckReturn()
             TaskType.RETURN -> refund(task)
             TaskType.CASH_INCOME -> cashOperation(IFptr.CASH_INCOME, task)
-            TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_INCOME, task)
+            TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_OUTCOME, task)
             TaskType.CLIENT_CONTACT -> setClientContact(task)
             TaskType.REPORT -> report(task)
             TaskType.SYNC_TIME -> syncTime()
