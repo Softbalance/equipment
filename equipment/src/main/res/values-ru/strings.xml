@@ -31,4 +31,7 @@
     <string name="equipment_lib_title_atol">Оборудование АТОЛ</string>
     <string name="equipment_lib_title_print_server">Сервер печати</string>
     <string name="equipment_lib_operation_not_supported">Операция %1$s не поддерживается</string>
+    <string name="equipment_error_network_with_description">Ошибка сетевого соединения. Проверьте подключение. %1$s</string>
+    <string name="equipment_error_mapping_with_description">Ошибка преобразования данных: %1$s</string>
+    <string name="equipment_error_unknown_with_description">Неизвестная ошибка: %1$s</string>
 </resources>

@@ -31,4 +31,7 @@
     <string name="equipment_lib_title_atol">ATOL Equipment</string>
     <string name="equipment_lib_title_print_server">Print Server</string>
     <string name="equipment_lib_operation_not_supported">The operation type %1$s isn\'t supported</string>
+    <string name="equipment_error_network_with_description">Network error. Check out the connection. %1$s</string>
+    <string name="equipment_error_mapping_with_description">Error while mapping of data: %1$s</string>
+    <string name="equipment_error_unknown_with_description">Unknown error: %1$s</string>
 </resources>

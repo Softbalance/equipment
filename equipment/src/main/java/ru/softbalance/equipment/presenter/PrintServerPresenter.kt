@@ -10,6 +10,8 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.isActive
+import ru.softbalance.equipment.model.EquipmentResponse
+import ru.softbalance.equipment.model.ExceptionHandler
 import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.mapping.jackson.JacksonConfigurator
@@ -27,6 +29,8 @@ class PrintServerPresenter(context: Context,
                            var url: String,
                            var port: Int,
                            var zipSettings: String? = null) : Presenter<PrintServerFragment>(context) {
+
+    private val exceptionHandler = ExceptionHandler(context)
 
     var connectedSuccessful: Boolean = false
     var printSuccessful: Boolean = false
@@ -142,10 +146,10 @@ class PrintServerPresenter(context: Context,
                 .subscribe({
                     connectedSuccessful = it.isSuccess()
                     deviceTypes = it.deviceTypes
-                    view()?.showConfirm(it.resultInfo)
+                    showResultInfo(it)
                 }, {
                     connectedSuccessful = false
-                    view()?.showError(it.toString())
+                    handleError(it)
                 })
     }
 
@@ -164,9 +168,9 @@ class PrintServerPresenter(context: Context,
                 .subscribe({
                     models = it.models
                     drivers = it.drivers
-                    view()?.showConfirm(it.resultInfo)
+                    showResultInfo(it)
                 }, {
-                    view()?.showError(it.toString())
+                    handleError(it)
                 })
     }
 
@@ -189,13 +193,9 @@ class PrintServerPresenter(context: Context,
                 }
                 .subscribe({ settings ->
                     deviceSettings = settings
-                    view()?.let {
-                        it.buildSettingsUI(settingsList())
-                        it.showConfirm(settings.resultInfo)
-                    }
-                }, {
-                    view()?.showError(it.toString())
-                })
+                    view()?.buildSettingsUI(settingsList())
+                    showResultInfo(settings)
+                }, { handleError(it) })
     }
 
     fun saveSettings() {
@@ -226,10 +226,8 @@ class PrintServerPresenter(context: Context,
                 }
                 .subscribe({
                     zipSettings = it.compressedSettings
-                    view()?.showConfirm(it.resultInfo)
-                }, {
-                    view()?.showError(it.toString())
-                })
+                    showResultInfo(it)
+                }, { handleError(it) })
     }
 
     fun testPrint() {
@@ -256,13 +254,17 @@ class PrintServerPresenter(context: Context,
                 }
                 .subscribe({ response ->
                     printSuccessful = response.isSuccess()
-                    view()?.let {
-                        it.showConfirm(response.resultInfo)
-                        it.showPrintState(printSuccessful)
-                    }
-                }, {
-                    view()?.showError(it.toString())
-                })
+                    showResultInfo(response)
+                    view()?.showPrintState(printSuccessful)
+                }, { handleError(it) })
+    }
+
+    private fun showResultInfo(result: EquipmentResponse) {
+        if (result.isSuccess()) {
+            view()?.showConfirm(result.resultInfo)
+        } else {
+            view()?.showError(result.resultInfo)
+        }
     }
 
     fun selectDeviceType(deviceType: PrintDeviceType) {
@@ -354,13 +356,15 @@ class PrintServerPresenter(context: Context,
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ response ->
                     connectedSuccessful = response.isSuccess()
-                    view()?.let {
-                        it.hideLoading()
-                        it.showConfirm(response.resultInfo)
-                    }
+                    showResultInfo(response)
                     hideLoading()
                     restoreUiState()
-                }, { view()?.showError(it.toString()) })
+                }, { handleError(it) })
+    }
+
+    private fun handleError(throwable: Throwable?) {
+        if (throwable == null) return
+        view()?.showError(exceptionHandler.getUserFriendlyMessage(throwable))
     }
 
     private fun hideLoading() {
