@@ -164,6 +164,9 @@ class Atol(context: Context,
             driver.put_Quantity(quantity.toDouble())
         }
 
+        val sum = task.param.sum?.toDouble() ?: (driver._Quantity * driver._Price)
+        driver.put_PositionSum(sum)
+
         task.param.tax?.let {
             driver.put_TaxNumber(it)
         }
