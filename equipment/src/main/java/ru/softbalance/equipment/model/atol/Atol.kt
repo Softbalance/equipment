@@ -19,7 +19,7 @@ class Atol(context: Context,
 
     private val context: Context = context.applicationContext
 
-    private var isFinished = true
+    private var isDriverInit = false
 
     companion object {
         private val RESULT_OK = 0
@@ -40,10 +40,10 @@ class Atol(context: Context,
     }
 
     override fun finish() {
-        if (isFinished) {
+        if (!isDriverInit) {
             return
         }
-        isFinished = true
+        isDriverInit = false
         try {
             driver.destroy()
         } catch (e: Exception) {
@@ -65,6 +65,8 @@ class Atol(context: Context,
             throw IllegalArgumentException("$initFailure : $incorrectSettings. ${getInfo()}")
         }
 
+        isDriverInit = true
+
         return driver
     }
 
@@ -83,7 +85,7 @@ class Atol(context: Context,
     }
 
     private fun executeTasksInternal(tasks: List<Task>, finishAfterExecute: Boolean): EquipmentResponse {
-        if (isFinished) {
+        if (!isDriverInit) {
             return EquipmentResponse().apply {
                 resultCode = ResponseCode.LOGICAL_ERROR
                 resultInfo = context.getString(R.string.equipment_init_failure)
@@ -378,11 +380,15 @@ class Atol(context: Context,
         return driver._DeviceSettings
     }
 
-    fun getTaxes(): Observable<List<Tax>> {
-        return Observable.fromCallable { getTaxesInternal() }
+    fun getTaxes(finishAfterExecute: Boolean): Observable<List<Tax>> {
+        return Observable.fromCallable { getTaxesInternal(finishAfterExecute) }
     }
 
-    private fun getTaxesInternal(): List<Tax> {
+    private fun getTaxesInternal(finishAfterExecute: Boolean): List<Tax> {
+        if (!isDriverInit) {
+            throw RuntimeException(context.getString(R.string.equipment_init_failure))
+        }
+
         if (driver.put_DeviceEnabled(true).isFail()) {
             throw RuntimeException(getInfo())
         }
@@ -402,6 +408,10 @@ class Atol(context: Context,
                 }
 
         driver.put_DeviceEnabled(false)
+
+        if (finishAfterExecute) {
+            finish()
+        }
 
         return taxes
     }
