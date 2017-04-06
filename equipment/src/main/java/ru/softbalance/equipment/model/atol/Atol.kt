@@ -13,13 +13,13 @@ import java.util.*
 class Atol(context: Context,
            val settings: String) : EcrDriver {
 
-    private val driver: IFptr by lazy { prepareDriver() }
-
-    private var lastInfo = ""
-
     private val context: Context = context.applicationContext
 
-    private var isDriverInit = false
+    private val driver: IFptr by lazy { prepareDriver() }
+
+    private var driverStatus = DriverStatus.NOT_INITIALIZED
+
+    private var lastInfo = ""
 
     companion object {
         private val RESULT_OK = 0
@@ -40,14 +40,13 @@ class Atol(context: Context,
     }
 
     override fun finish() {
-        if (!isDriverInit) {
-            return
-        }
-        isDriverInit = false
-        try {
-            driver.destroy()
-        } catch (e: Exception) {
-            Log.e(Atol::class.java.simpleName, null, e)
+        if (driverStatus == DriverStatus.INITIALIZED) {
+            driverStatus = DriverStatus.FINISHED
+            try {
+                driver.destroy()
+            } catch (e: Exception) {
+                Log.e(Atol::class.java.simpleName, null, e)
+            }
         }
     }
 
@@ -65,7 +64,7 @@ class Atol(context: Context,
             throw IllegalArgumentException("$initFailure : $incorrectSettings. ${getInfo()}")
         }
 
-        isDriverInit = true
+        driverStatus = DriverStatus.INITIALIZED
 
         return driver
     }
@@ -85,7 +84,7 @@ class Atol(context: Context,
     }
 
     private fun executeTasksInternal(tasks: List<Task>, finishAfterExecute: Boolean): EquipmentResponse {
-        if (!isDriverInit) {
+        if (driverStatus == DriverStatus.FINISHED) {
             return EquipmentResponse().apply {
                 resultCode = ResponseCode.LOGICAL_ERROR
                 resultInfo = context.getString(R.string.equipment_init_failure)
@@ -385,7 +384,7 @@ class Atol(context: Context,
     }
 
     private fun getTaxesInternal(finishAfterExecute: Boolean): List<Tax> {
-        if (!isDriverInit) {
+        if (driverStatus == DriverStatus.FINISHED) {
             throw RuntimeException(context.getString(R.string.equipment_init_failure))
         }
 
