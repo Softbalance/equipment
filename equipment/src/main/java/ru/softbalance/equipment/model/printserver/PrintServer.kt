@@ -39,7 +39,7 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
         return builder.build()
     }
 
-    override fun execute(tasks: List<Task>): Observable<EquipmentResponse> {
+    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Observable<EquipmentResponse> {
         return Observable.fromCallable { TasksRequest(tasks, settings) }
                 .flatMap { api.execute(it) }
     }

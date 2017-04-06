@@ -17,7 +17,9 @@ class Atol(context: Context,
 
     private var lastInfo = ""
 
-    private val context: Context
+    private val context: Context = context.applicationContext
+
+    private var isFinished = true
 
     companion object {
         private val RESULT_OK = 0
@@ -33,15 +35,15 @@ class Atol(context: Context,
         private val DASH_TEMPLATE = "--------------------------------------------------"
     }
 
-    init {
-        this.context = context.applicationContext
-    }
-
-    override fun execute(tasks: List<Task>): Observable<EquipmentResponse> {
-        return Observable.fromCallable { executeTasksInternal(tasks) }
+    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Observable<EquipmentResponse> {
+        return Observable.fromCallable { executeTasksInternal(tasks, finishAfterExecute) }
     }
 
     override fun finish() {
+        if (isFinished) {
+            return
+        }
+        isFinished = true
         try {
             driver.destroy()
         } catch (e: Exception) {
@@ -80,7 +82,14 @@ class Atol(context: Context,
         return info
     }
 
-    private fun executeTasksInternal(tasks: List<Task>): EquipmentResponse {
+    private fun executeTasksInternal(tasks: List<Task>, finishAfterExecute: Boolean): EquipmentResponse {
+        if (isFinished) {
+            return EquipmentResponse().apply {
+                resultCode = ResponseCode.LOGICAL_ERROR
+                resultInfo = context.getString(R.string.equipment_init_failure)
+            }
+        }
+
         if (driver.put_DeviceEnabled(true).isFail()) {
             return EquipmentResponse().apply {
                 resultCode = ResponseCode.HANDLING_ERROR
@@ -99,10 +108,14 @@ class Atol(context: Context,
 
         driver.put_DeviceEnabled(false)
 
-        return EquipmentResponse().apply {
-            resultCode = ResponseCode.SUCCESS
-            resultInfo = getInfo()
+        val result = EquipmentResponse()
+        result.resultCode = ResponseCode.SUCCESS
+        result.resultInfo = getInfo()
+
+        if (finishAfterExecute) {
+            finish()
         }
+        return result
     }
 
     private fun executeTask(task: Task): Boolean {

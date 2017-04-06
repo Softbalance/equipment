@@ -243,7 +243,7 @@ class PrintServerPresenter(context: Context,
         view()?.showLoading(context.getString(R.string.test_print))
 
         printRequest = PrintServer(url, port, zipSettings ?: "")
-                .execute(printTasks)
+                .execute(printTasks, true)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {

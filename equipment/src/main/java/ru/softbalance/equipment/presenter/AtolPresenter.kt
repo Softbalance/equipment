@@ -65,7 +65,7 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                 Task().apply { data = context.getString(R.string.text_print) },
                 Task().apply { type = TaskType.PRINT_HEADER })
 
-        printTest = driver.execute(tasks)
+        printTest = driver.execute(tasks, true)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {

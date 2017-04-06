@@ -94,7 +94,7 @@ kapt {
     generateStubs = true
 }
 
-def supportVers = '25.2.0'
+def supportVers = '25.3.1'
 def mockitoVers = '2.4.2'
 
 dependencies {
@@ -110,7 +110,7 @@ dependencies {
     kapt "com.android.databinding:compiler:$androidPluginVersion"
 
     // UI
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     // Testing
     testCompile 'junit:junit:4.12'
