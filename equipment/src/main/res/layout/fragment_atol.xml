@@ -19,4 +19,11 @@
         android:layout_weight="1"
         android:text="@string/test_print" />
 
+    <Button
+        android:id="@+id/getSerial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@string/serial" />
+
 </LinearLayout>

@@ -35,6 +35,7 @@ class AtolFragment : BaseFragment() {
 
     private var connect: Button? = null
     private var print: Button? = null
+    private var getSerial: Button? = null
 
     private lateinit var presenter: AtolPresenter
 
@@ -62,9 +63,11 @@ class AtolFragment : BaseFragment() {
 
         connect = rootView?.findViewById(R.id.connectPrinter) as Button
         print = rootView?.findViewById(R.id.testPrint) as Button
+        getSerial = rootView?.findViewById(R.id.getSerial) as Button
 
         connect?.setOnClickListener { presenter.startConnection() }
         print?.setOnClickListener { presenter.testPrint() }
+        getSerial?.setOnClickListener { presenter.getSerial() }
 
         presenter.bindView(this)
 

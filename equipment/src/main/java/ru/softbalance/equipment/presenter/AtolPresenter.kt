@@ -10,7 +10,6 @@ import ru.softbalance.equipment.model.atol.Atol
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 
 class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment>(context) {
 
@@ -58,10 +57,9 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                 Task().apply { data = context.getString(R.string.text_print) },
                 Task().apply { type = TaskType.PRINT_HEADER })
 
-        var driver: Atol = Atol(context, settings)
+        val driver: Atol = Atol(context, settings)
 
-        printTest = driver.execute(tasks, true)
-                .subscribeOn(Schedulers.io())
+        printTest = driver.execute(tasks, finishAfterExecute = true)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
                     view()?.hideLoading()
@@ -91,5 +89,19 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
     fun updateSettings(settings: String) {
         this.settings = settings
+    }
+
+    fun getSerial() {
+        view()?.showLoading(context.getString(R.string.serial) ?: "")
+        Atol(context, settings).getSerial(finishAfterExecute = true)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnUnsubscribe {
+                    view()?.hideLoading()
+                }
+                .subscribe ({
+                    res -> view()?.showInfo(res)
+                }, {
+                    err -> view()?.showError(err.message ?: "")
+                })
     }
 }
