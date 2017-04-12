@@ -14,7 +14,6 @@ import rx.schedulers.Schedulers
 
 class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment>(context) {
 
-    private var driver: Atol
     var printedSuccessful: Boolean = false
 
     var settings: String = ""
@@ -22,12 +21,6 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
     init {
         this.settings = settings
-        driver = Atol(context, settings)
-    }
-
-    private fun initDriver() {
-        driver.finish()
-        driver = Atol(context, settings)
     }
 
     private var printTest: Subscription? = null
@@ -65,6 +58,8 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                 Task().apply { data = context.getString(R.string.text_print) },
                 Task().apply { type = TaskType.PRINT_HEADER })
 
+        var driver: Atol = Atol(context, settings)
+
         printTest = driver.execute(tasks, true)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -89,13 +84,12 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
     fun startConnection() {
         if (settings.isNullOrEmpty()) {
-            settings = driver.getDefaultSettings()
+            settings = Atol(context, settings).getDefaultSettings()
         }
         view()?.launchConnectionActivity(settings)
     }
 
     fun updateSettings(settings: String) {
         this.settings = settings
-        initDriver()
     }
 }
