@@ -7,11 +7,12 @@ import com.atol.drivers.fptr.IFptr
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.model.*
 import rx.Observable
+import rx.Single
+import rx.schedulers.Schedulers
 import java.math.BigDecimal
 import java.util.*
 
-class Atol(context: Context,
-           val settings: String) : EcrDriver {
+class Atol(context: Context, val settings: String) : EcrDriver {
 
     private val context: Context = context.applicationContext
 
@@ -22,21 +23,24 @@ class Atol(context: Context,
     private var lastInfo = ""
 
     companion object {
-        private val RESULT_OK = 0
+        private const val RESULT_OK = 0
 
-        private val TAX_INDEX = 201
-        private val TAX_FIRST = 1
-        private val TAX_LAST = 5
+        private const val TAX_INDEX = 201
+        private const val TAX_FIRST = 1
+        private const val TAX_LAST = 5
 
-        private val PRINT_STRING_TRAIT = "trait"
-        private val PRINT_STRING_DASH = "dash"
+        private const val SERIAL_REGISTER_INDEX = 22
 
-        private val TRAIT_TEMPLATE = "=================================================="
-        private val DASH_TEMPLATE = "--------------------------------------------------"
+        private const val PRINT_STRING_TRAIT = "trait"
+        private const val PRINT_STRING_DASH = "dash"
+
+        private const val TRAIT_TEMPLATE = "=================================================="
+        private const val DASH_TEMPLATE = "--------------------------------------------------"
     }
 
     override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Observable<EquipmentResponse> {
         return Observable.fromCallable { executeTasksInternal(tasks, finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
     }
 
     override fun finish() {
@@ -381,6 +385,7 @@ class Atol(context: Context,
 
     fun getTaxes(finishAfterExecute: Boolean): Observable<List<Tax>> {
         return Observable.fromCallable { getTaxesInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
     }
 
     private fun getTaxesInternal(finishAfterExecute: Boolean): List<Tax> {
@@ -413,6 +418,26 @@ class Atol(context: Context,
         }
 
         return taxes
+    }
+
+    fun getSerial(finishAfterExecute: Boolean): Single<String> {
+        return Single.fromCallable { getSerialInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
+    }
+
+    private fun getSerialInternal(finishAfterExecute: Boolean): String {
+        var serial: String = ""
+        driver.run {
+            put_DeviceEnabled(true)
+            put_RegisterNumber(SERIAL_REGISTER_INDEX)
+            GetRegister()
+            serial = _SerialNumber
+            put_DeviceEnabled(false)
+        }
+        if (finishAfterExecute) {
+            finish()
+        }
+        return serial
     }
 }
 
