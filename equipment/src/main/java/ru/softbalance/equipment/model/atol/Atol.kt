@@ -106,7 +106,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             if (!executeTask(it)) {
                 return EquipmentResponse().apply {
                     resultCode = ResponseCode.HANDLING_ERROR
-                    resultInfo = getInfo()
+                    resultInfo = getInfo() + " (task " + it.type + ")"
                 }
             }
         }
