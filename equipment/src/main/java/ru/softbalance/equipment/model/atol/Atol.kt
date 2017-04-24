@@ -38,8 +38,8 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         private const val DASH_TEMPLATE = "--------------------------------------------------"
     }
 
-    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Observable<EquipmentResponse> {
-        return Observable.fromCallable { executeTasksInternal(tasks, finishAfterExecute) }
+    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
+        return Single.fromCallable { executeTasksInternal(tasks, finishAfterExecute) }
                 .subscribeOn(Schedulers.io())
     }
 
@@ -420,7 +420,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return taxes
     }
 
-    fun getSerial(finishAfterExecute: Boolean): Single<String> {
+    override fun getSerial(finishAfterExecute: Boolean): Single<String> {
         return Single.fromCallable { getSerialInternal(finishAfterExecute) }
                 .subscribeOn(Schedulers.io())
     }

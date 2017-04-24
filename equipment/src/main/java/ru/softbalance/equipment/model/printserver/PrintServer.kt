@@ -16,8 +16,12 @@ import ru.softbalance.equipment.model.printserver.api.model.TasksRequest
 import ru.softbalance.equipment.model.printserver.api.response.TaxesResponse
 import ru.softbalance.equipment.toHttpUrl
 import rx.Observable
+import rx.Single
 
 class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
+    override fun getSerial(finishAfterExecute: Boolean): Single<String> {
+        return Single.just ("getSerial is not implemented for PrintServer")
+    }
 
     val api: PrintServerApi
 
@@ -39,9 +43,9 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
         return builder.build()
     }
 
-    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Observable<EquipmentResponse> {
-        return Observable.fromCallable { TasksRequest(tasks, settings) }
-                .flatMap { api.execute(it) }
+    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
+        return Single.fromCallable { TasksRequest(tasks, settings) }
+                .flatMap { api.execute(it).toSingle() }
     }
 
     fun getTaxes(): Observable<TaxesResponse> {
