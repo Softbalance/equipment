@@ -49,8 +49,7 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
     }
 
     fun getTaxes(): Observable<TaxesResponse> {
-        return api.extractDeviceSettings(CompressedSettings.create(settings))
-                .flatMap { api.getTaxes(it.driverId) }
+        return api.getTaxes(CompressedSettings.create(settings))
     }
 
     override fun finish() {

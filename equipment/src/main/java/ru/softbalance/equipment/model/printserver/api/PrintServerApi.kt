@@ -37,9 +37,8 @@ interface PrintServerApi {
     @POST("/deviceSettingZip")
     fun compressSettings(@Body settingsValues: SettingsValues): Observable<CompressedSettingsResponse>
 
-    @FormUrlEncoded
     @POST("/taxes")
-    fun getTaxes(@Field("driverId") driverId: String): Observable<TaxesResponse>
+    fun getTaxes(@Body compressedSettings: RequestBody): Observable<TaxesResponse>
 
     @POST("/execute")
     fun execute(@Body tasksRequest: TasksRequest): Observable<EquipmentResponse>
