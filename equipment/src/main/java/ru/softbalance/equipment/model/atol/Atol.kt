@@ -113,9 +113,10 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
         driver.put_DeviceEnabled(false)
 
-        val result = EquipmentResponse()
-        result.resultCode = ResponseCode.SUCCESS
-        result.resultInfo = getInfo()
+        val result = EquipmentResponse().apply {
+            resultCode = ResponseCode.SUCCESS
+            resultInfo = getInfo()
+        }
 
         if (finishAfterExecute) {
             finish()
@@ -438,6 +439,76 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             finish()
         }
         return serial
+    }
+
+    override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
+        return Single.fromCallable { getSessionStateInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
+    }
+
+    private fun getSessionStateInternal(finishAfterExecute: Boolean): SessionStateResponse {
+        if (driverStatus == DriverStatus.FINISHED) {
+            return SessionStateResponse().apply {
+                resultCode = ResponseCode.LOGICAL_ERROR
+                resultInfo = context.getString(R.string.equipment_init_failure)
+            }
+        }
+
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            return SessionStateResponse().apply {
+                resultCode = ResponseCode.HANDLING_ERROR
+                resultInfo = getInfo()
+            }
+        }
+
+        val result = SessionStateResponse()
+        result.frSessionState = FrSessionState().apply {
+            shiftOpen = driver._SessionOpened
+            shiftNumber = driver._Session
+            paperExists = driver._CheckPaperPresent
+        }
+        result.resultCode = ResponseCode.SUCCESS
+        result.resultInfo = getInfo()
+
+        driver.put_DeviceEnabled(false)
+
+        if (finishAfterExecute) {
+            finish()
+        }
+        return result
+    }
+
+    override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
+        return Single.fromCallable { openShiftInternal(finishAfterExecute) }
+    }
+
+    private fun openShiftInternal(finishAfterExecute: Boolean): OpenShiftResponse {
+        if (driverStatus == DriverStatus.FINISHED) {
+            return OpenShiftResponse().apply {
+                resultCode = ResponseCode.LOGICAL_ERROR
+                resultInfo = context.getString(R.string.equipment_init_failure)
+            }
+        }
+
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            return OpenShiftResponse().apply {
+                resultCode = ResponseCode.HANDLING_ERROR
+                resultInfo = getInfo()
+            }
+        }
+
+        prepareRegistration()
+
+        driver.put_DeviceEnabled(false)
+
+        if (finishAfterExecute) {
+            finish()
+        }
+
+        return OpenShiftResponse().apply {
+            resultCode = ResponseCode.SUCCESS
+            resultInfo = getInfo()
+        }
     }
 }
 

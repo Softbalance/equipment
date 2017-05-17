@@ -6,9 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import ru.softbalance.equipment.BuildConfig
-import ru.softbalance.equipment.model.EcrDriver
-import ru.softbalance.equipment.model.EquipmentResponse
-import ru.softbalance.equipment.model.Task
+import ru.softbalance.equipment.model.*
 import ru.softbalance.equipment.model.mapping.jackson.JacksonConfigurator
 import ru.softbalance.equipment.model.printserver.api.PrintServerApi
 import ru.softbalance.equipment.model.printserver.api.model.CompressedSettings
@@ -19,6 +17,7 @@ import rx.Observable
 import rx.Single
 
 class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
+
     override fun getSerial(finishAfterExecute: Boolean): Single<String> {
         return Single.just ("getSerial is not implemented for PrintServer")
     }
@@ -50,6 +49,16 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
 
     fun getTaxes(): Observable<TaxesResponse> {
         return api.getTaxes(CompressedSettings.create(settings))
+    }
+
+    override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
+        return Single.just(SessionStateResponse()
+                .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
+    }
+
+    override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
+        return Single.just(OpenShiftResponse()
+                .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
     }
 
     override fun finish() {

@@ -24,9 +24,11 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
         const val DRIVER_TYPE_SERVER = 2
 
         const val SETTINGS_ARG = "SETTINGS_ARG"
+        const val SERIAL_ARG = "SERIAL_ARG"
     }
 
     var settings: String = ""
+    var serial: String = ""
     var url: String = ""
     var port: Int = 0
     var type: Int = 0
@@ -64,6 +66,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
             port = getInt(PORT_ARG, 0)
             type = getInt(EQUIPMENT_TYPE_ARG, 0)
             settings = getString(SETTINGS_ARG, "")
+            serial = getString(SERIAL_ARG, "")
         }
     }
 
@@ -83,8 +86,9 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onSettingsSelected(settings: String) {
+    override fun onSettingsSelected(settings: String, serial: String) {
         this.settings = settings
+        this.serial = serial
     }
 
     override fun onSettingsSelected(settings: String,
@@ -111,6 +115,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
         val resultCode = if (settings.isNotEmpty()) Activity.RESULT_OK else Activity.RESULT_CANCELED
         val putExtra = Intent().apply {
             putExtra(SETTINGS_ARG, settings)
+            putExtra(SERIAL_ARG, serial)
             putExtra(URL_ARG, url)
             putExtra(PORT_ARG, port)
             putExtra(EQUIPMENT_TYPE_ARG, type)

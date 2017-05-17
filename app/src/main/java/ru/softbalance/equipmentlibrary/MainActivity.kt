@@ -10,6 +10,7 @@ import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ATOL
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_SERVER
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SERIAL_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
 import ru.softbalance.equipmentlibrary.databinding.ActivityMainBinding
@@ -46,8 +47,11 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == DRIVER_REQUEST){
             val settings = if (data?.getStringExtra(SETTINGS_ARG).isNullOrEmpty())
                 "no settings data found" else data?.getStringExtra(SETTINGS_ARG)
+            val serial = if (data?.getStringExtra(SERIAL_ARG).isNullOrEmpty())
+                "no serial data found" else data?.getStringExtra(SERIAL_ARG)
 
             Toast.makeText(this, "settings: " + settings, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "serial: " + serial, Toast.LENGTH_LONG).show()
         }
     }
 }

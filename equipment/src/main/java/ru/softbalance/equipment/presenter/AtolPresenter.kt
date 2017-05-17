@@ -1,9 +1,9 @@
 package ru.softbalance.equipment.presenter
 
-
 import android.content.Context
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.isActive
+import ru.softbalance.equipment.model.FrSessionState
 import ru.softbalance.equipment.model.Task
 import ru.softbalance.equipment.model.TaskType
 import ru.softbalance.equipment.model.atol.Atol
@@ -16,6 +16,10 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
     var printedSuccessful: Boolean = false
 
     var settings: String = ""
+        private set
+    var serial: String = ""
+        private set
+    var sessionState: FrSessionState = FrSessionState()
         private set
 
     init {
@@ -59,9 +63,20 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         val driver: Atol = Atol(context, settings)
 
-        printTest = driver.execute(tasks, finishAfterExecute = true)
-                .observeOn(AndroidSchedulers.mainThread())
+        printTest = driver.getSerial(finishAfterExecute = false)
+                .flatMap { serialRes -> serial = serialRes
+                    driver.getSessionState(finishAfterExecute = false)
+                            .flatMap { sessionRes ->
+                                sessionState = sessionRes.frSessionState
+                                driver.execute(tasks, finishAfterExecute = false)
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .doOnSuccess {
+                                            view()?.showConfirm("$serialRes, $sessionRes")
+                                        }
+                            }
+                }
                 .doOnUnsubscribe {
+                    driver.finish()
                     view()?.hideLoading()
                 }
                 .subscribe({ response ->
@@ -69,7 +84,6 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                     view()?.let {
                         if (printedSuccessful && settings.isNotEmpty()) {
                             it.showSettingsState(true)
-                            it.showConfirm("OK")
                         } else {
                             it.showError(response.resultInfo)
                         }

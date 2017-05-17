@@ -12,13 +12,12 @@ import ru.softbalance.equipment.presenter.AtolPresenter
 import ru.softbalance.equipment.presenter.PresentersCache
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
 
 class AtolFragment : BaseFragment() {
 
     interface Callback {
-        fun onSettingsSelected(settings: String)
+        fun onSettingsSelected(settings: String, serial: String)
     }
 
     companion object {
@@ -51,7 +50,7 @@ class AtolFragment : BaseFragment() {
 
     fun updateResult() {
         if (presenter.printedSuccessful && presenter.settings.isNotEmpty() && hostParent is Callback) {
-            (hostParent as Callback).onSettingsSelected(presenter.settings)
+            (hostParent as Callback).onSettingsSelected(presenter.settings, presenter.serial)
         }
     }
 
@@ -108,13 +107,11 @@ class AtolFragment : BaseFragment() {
         if (requestCode == AtolFragment.REQUEST_CONNECT_DEVICE && data.extras != null) {
             presenter.updateSettings(extractSettings(data.extras) ?: "")
             Observable.just(true)
-                    .delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .delay(500, TimeUnit.MILLISECONDS)
                     .doOnNext { presenter.testPrint() }
                     .subscribe({}, Throwable::printStackTrace)
         }
     }
 
-    override fun getTitle(): String {
-        return getString(R.string.equipment_lib_title_atol)
-    }
+    override fun getTitle(): String = getString(R.string.equipment_lib_title_atol)
 }
