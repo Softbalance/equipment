@@ -15,24 +15,23 @@ import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
 import ru.softbalance.equipmentlibrary.databinding.ActivityMainBinding
 
-
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val DRIVER_REQUEST = 1;
+        const val DRIVER_REQUEST = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        setContentView(R.layout.activity_main)
 
-        binding.buttonAtol.setOnClickListener {
+        findViewById(R.id.buttonAtol).setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
                     .putExtra(DRIVER_ARG, DRIVER_TYPE_ATOL), DRIVER_REQUEST)
         }
 
-        binding.buttonPrinter.setOnClickListener {
+        findViewById(R.id.buttonPrinter).setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
                     .putExtra(DRIVER_ARG, DRIVER_TYPE_SERVER)
                     .putExtra(URL_ARG, "178.170.230.140")

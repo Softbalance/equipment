@@ -71,7 +71,7 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                                 driver.execute(tasks, finishAfterExecute = false)
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .doOnSuccess {
-                                            view()?.showConfirm("$serialRes, $sessionRes")
+                                            view()?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
                                         }
                             }
                 }
