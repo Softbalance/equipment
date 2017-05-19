@@ -19,7 +19,7 @@ import rx.Single
 class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
 
     override fun getSerial(finishAfterExecute: Boolean): Single<String> {
-        return Single.just ("getSerial is not implemented for PrintServer")
+        return Single.just ("getInfo is not implemented for PrintServer")
     }
 
     val api: PrintServerApi

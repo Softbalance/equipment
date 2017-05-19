@@ -478,6 +478,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
         return Single.fromCallable { openShiftInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
     }
 
     private fun openShiftInternal(finishAfterExecute: Boolean): OpenShiftResponse {

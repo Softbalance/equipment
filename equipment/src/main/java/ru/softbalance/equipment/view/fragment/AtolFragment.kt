@@ -12,6 +12,7 @@ import ru.softbalance.equipment.presenter.AtolPresenter
 import ru.softbalance.equipment.presenter.PresentersCache
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
 
 class AtolFragment : BaseFragment() {
@@ -35,6 +36,7 @@ class AtolFragment : BaseFragment() {
     private var connect: Button? = null
     private var print: Button? = null
     private var getSerial: Button? = null
+    private var openShift: Button? = null
 
     private lateinit var presenter: AtolPresenter
 
@@ -63,10 +65,12 @@ class AtolFragment : BaseFragment() {
         connect = rootView?.findViewById(R.id.connectPrinter) as Button
         print = rootView?.findViewById(R.id.testPrint) as Button
         getSerial = rootView?.findViewById(R.id.getSerial) as Button
+        openShift = rootView?.findViewById(R.id.openShift) as Button
 
         connect?.setOnClickListener { presenter.startConnection() }
         print?.setOnClickListener { presenter.testPrint() }
-        getSerial?.setOnClickListener { presenter.getSerial() }
+        getSerial?.setOnClickListener { presenter.getInfo() }
+        openShift?.setOnClickListener { presenter.openShift() }
 
         presenter.bindView(this)
 
@@ -108,6 +112,7 @@ class AtolFragment : BaseFragment() {
             presenter.updateSettings(extractSettings(data.extras) ?: "")
             Observable.just(true)
                     .delay(500, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
                     .doOnNext { presenter.testPrint() }
                     .subscribe({}, Throwable::printStackTrace)
         }
