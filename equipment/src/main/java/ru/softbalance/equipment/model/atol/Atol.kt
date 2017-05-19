@@ -454,6 +454,10 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             return SessionStateResponse().handlingError() as SessionStateResponse
         }
 
+        // it is required for get all information from registers
+        // code belong won't work without calling get_InfoLine method
+        driver._InfoLine
+
         val result = SessionStateResponse().apply {
             frSessionState = FrSessionState().apply {
                 shiftOpen = driver._SessionOpened
