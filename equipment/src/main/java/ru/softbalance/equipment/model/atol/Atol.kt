@@ -87,19 +87,28 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return info
     }
 
+    private fun BaseResponse.initFailure(): BaseResponse = this.apply {
+        resultCode = ResponseCode.LOGICAL_ERROR
+        resultInfo = context.getString(R.string.equipment_init_failure)
+    }
+
+    private fun BaseResponse.handlingError(): BaseResponse = this.apply {
+        resultCode = ResponseCode.HANDLING_ERROR
+        resultInfo = getInfo()
+    }
+
+    private fun BaseResponse.successResult(): BaseResponse = this.apply {
+        resultCode = ResponseCode.SUCCESS
+        resultInfo = getInfo()
+    }
+
     private fun executeTasksInternal(tasks: List<Task>, finishAfterExecute: Boolean): EquipmentResponse {
         if (driverStatus == DriverStatus.FINISHED) {
-            return EquipmentResponse().apply {
-                resultCode = ResponseCode.LOGICAL_ERROR
-                resultInfo = context.getString(R.string.equipment_init_failure)
-            }
+            return EquipmentResponse().initFailure() as EquipmentResponse
         }
 
         if (driver.put_DeviceEnabled(true).isFail()) {
-            return EquipmentResponse().apply {
-                resultCode = ResponseCode.HANDLING_ERROR
-                resultInfo = getInfo()
-            }
+            return EquipmentResponse().handlingError() as EquipmentResponse
         }
 
         tasks.forEach {
@@ -113,9 +122,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
         driver.put_DeviceEnabled(false)
 
-        val result = EquipmentResponse()
-        result.resultCode = ResponseCode.SUCCESS
-        result.resultInfo = getInfo()
+        val result = EquipmentResponse().successResult() as EquipmentResponse
 
         if (finishAfterExecute) {
             finish()
@@ -271,11 +278,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return printSimpleString(task)
     }
 
-    private fun buildSymbolicPrintTask(symbols: String): Task {
-        val task = Task()
-        task.data = symbols
-        return task
-    }
+    private fun buildSymbolicPrintTask(symbols: String): Task = Task().apply { data = symbols }
 
     private fun printSimpleString(task: Task): Boolean {
         val params = task.param
@@ -326,25 +329,22 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     private fun report(task: Task): Boolean {
         cancelCheck()
 
-        val mode: Int
-        if (task.param.reportType == ReportType.REPORT_Z) {
-            mode = IFptr.MODE_REPORT_CLEAR
+        val mode: Int = if (task.param.reportType == ReportType.REPORT_Z) {
+            IFptr.MODE_REPORT_CLEAR
         } else {
-            mode = IFptr.MODE_REPORT_NO_CLEAR
+            IFptr.MODE_REPORT_NO_CLEAR
         }
 
         if (!setMode(mode)) {
             return false
         }
 
-        val reportType: Int
-
-        when (task.param.reportType) {
-            ReportType.REPORT_Z -> reportType = IFptr.REPORT_Z
-            ReportType.REPORT_X -> reportType = IFptr.REPORT_X
-            ReportType.REPORT_DEPARTMENT -> reportType = IFptr.REPORT_DEPARTMENTS
-            ReportType.REPORT_CASHIERS -> reportType = IFptr.REPORT_CASHIERS
-            ReportType.REPORT_HOURS -> reportType = IFptr.REPORT_HOURS
+        val reportType: Int = when (task.param.reportType) {
+            ReportType.REPORT_Z -> IFptr.REPORT_Z
+            ReportType.REPORT_X -> IFptr.REPORT_X
+            ReportType.REPORT_DEPARTMENT -> IFptr.REPORT_DEPARTMENTS
+            ReportType.REPORT_CASHIERS -> IFptr.REPORT_CASHIERS
+            ReportType.REPORT_HOURS -> IFptr.REPORT_HOURS
             else -> {
                 Log.e(Atol::class.java.simpleName, "The report operation ${task.param.reportType} isn't supported")
                 return false
@@ -438,6 +438,69 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             finish()
         }
         return serial
+    }
+
+    override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
+        return Single.fromCallable { getSessionStateInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
+    }
+
+    private fun getSessionStateInternal(finishAfterExecute: Boolean): SessionStateResponse {
+        if (driverStatus == DriverStatus.FINISHED) {
+            return SessionStateResponse().initFailure() as SessionStateResponse
+        }
+
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            return SessionStateResponse().handlingError() as SessionStateResponse
+        }
+
+        // it is required for get all information from registers
+        // code belong won't work without calling get_InfoLine method
+        driver._InfoLine
+
+        val result = SessionStateResponse().apply {
+            frSessionState = FrSessionState().apply {
+                shiftOpen = driver._SessionOpened
+                shiftNumber = driver._Session
+                paperExists = driver._CheckPaperPresent
+            }
+            resultCode = ResponseCode.SUCCESS
+            resultInfo = getInfo()
+        }
+
+        driver.put_DeviceEnabled(false)
+
+        if (finishAfterExecute) {
+            finish()
+        }
+        return result
+    }
+
+    override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
+        return Single.fromCallable { openShiftInternal(finishAfterExecute) }
+                .subscribeOn(Schedulers.io())
+    }
+
+    private fun openShiftInternal(finishAfterExecute: Boolean): OpenShiftResponse {
+        if (driverStatus == DriverStatus.FINISHED) {
+            return OpenShiftResponse().initFailure() as OpenShiftResponse
+        }
+
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            return OpenShiftResponse().handlingError() as OpenShiftResponse
+        }
+
+        prepareRegistration()
+
+        driver.put_DeviceEnabled(false)
+
+        val openShiftResponse = OpenShiftResponse().successResult() as OpenShiftResponse
+
+        if (finishAfterExecute) {
+            finish()
+        }
+
+        return openShiftResponse
     }
 }
 

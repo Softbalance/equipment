@@ -8,5 +8,9 @@ interface EcrDriver {
 
     fun getSerial(finishAfterExecute: Boolean): Single<String>
 
+    fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse>
+
+    fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse>
+
     fun finish()
 }

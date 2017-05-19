@@ -1,6 +1,5 @@
 package ru.softbalance.equipment.presenter
 
-
 import android.content.Context
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.isActive
@@ -17,12 +16,16 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
     var settings: String = ""
         private set
+    var serial: String = ""
+        private set
 
     init {
         this.settings = settings
     }
 
     private var printTest: Subscription? = null
+    private var getFrInfo: Subscription? = null
+    private var openShift: Subscription? = null
 
     override fun bindView(view: AtolFragment) {
         super.bindView(view)
@@ -44,6 +47,8 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
     override fun onFinish() {
         printTest?.unsubscribe()
+        getFrInfo?.unsubscribe()
+        openShift?.unsubscribe()
     }
 
     fun testPrint() {
@@ -59,9 +64,13 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         val driver: Atol = Atol(context, settings)
 
-        printTest = driver.execute(tasks, finishAfterExecute = true)
+        printTest = driver.getSerial(finishAfterExecute = false)
+                .flatMap { serialRes -> serial = serialRes
+                                driver.execute(tasks, finishAfterExecute = false)
+                }
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
+                    driver.finish()
                     view()?.hideLoading()
                 }
                 .subscribe({ response ->
@@ -69,7 +78,6 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                     view()?.let {
                         if (printedSuccessful && settings.isNotEmpty()) {
                             it.showSettingsState(true)
-                            it.showConfirm("OK")
                         } else {
                             it.showError(response.resultInfo)
                         }
@@ -91,15 +99,46 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
         this.settings = settings
     }
 
-    fun getSerial() {
-        view()?.showLoading(context.getString(R.string.serial) ?: "")
-        Atol(context, settings).getSerial(finishAfterExecute = true)
+    fun getInfo() {
+
+        if (getFrInfo.isActive()) {
+            return
+        }
+
+        view()?.showLoading(context.getString(R.string.device_info) ?: "")
+
+        val driver: Atol = Atol(context, settings)
+        getFrInfo = driver.getSerial(finishAfterExecute = false)
+                .flatMap { serialRes -> driver.getSessionState(finishAfterExecute = false)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSuccess { sessionRes ->
+                            view()?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
+                        }
+                }
+                .doOnUnsubscribe {
+                    driver.finish()
+                    view()?.hideLoading()
+                }
+                .subscribe ({ /* ok */ }, {
+                    err -> view()?.showError(err.message ?: "")
+                })
+    }
+
+    fun openShift(){
+        if (openShift.isActive()) {
+            return
+        }
+
+        view()?.showLoading(context.getString(R.string.open_shift) ?: "")
+
+        val driver: Atol = Atol(context, settings)
+        openShift = driver.openShift(finishAfterExecute = true)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
                     view()?.hideLoading()
                 }
                 .subscribe ({
-                    res -> view()?.showInfo(res)
+                    view()?.showConfirm("Shift opened")
                 }, {
                     err -> view()?.showError(err.message ?: "")
                 })

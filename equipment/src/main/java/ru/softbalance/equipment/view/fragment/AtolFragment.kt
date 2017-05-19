@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 class AtolFragment : BaseFragment() {
 
     interface Callback {
-        fun onSettingsSelected(settings: String)
+        fun onSettingsSelected(settings: String, serial: String)
     }
 
     companion object {
@@ -36,6 +36,7 @@ class AtolFragment : BaseFragment() {
     private var connect: Button? = null
     private var print: Button? = null
     private var getSerial: Button? = null
+    private var openShift: Button? = null
 
     private lateinit var presenter: AtolPresenter
 
@@ -51,7 +52,7 @@ class AtolFragment : BaseFragment() {
 
     fun updateResult() {
         if (presenter.printedSuccessful && presenter.settings.isNotEmpty() && hostParent is Callback) {
-            (hostParent as Callback).onSettingsSelected(presenter.settings)
+            (hostParent as Callback).onSettingsSelected(presenter.settings, presenter.serial)
         }
     }
 
@@ -64,10 +65,12 @@ class AtolFragment : BaseFragment() {
         connect = rootView?.findViewById(R.id.connectPrinter) as Button
         print = rootView?.findViewById(R.id.testPrint) as Button
         getSerial = rootView?.findViewById(R.id.getSerial) as Button
+        openShift = rootView?.findViewById(R.id.openShift) as Button
 
         connect?.setOnClickListener { presenter.startConnection() }
         print?.setOnClickListener { presenter.testPrint() }
-        getSerial?.setOnClickListener { presenter.getSerial() }
+        getSerial?.setOnClickListener { presenter.getInfo() }
+        openShift?.setOnClickListener { presenter.openShift() }
 
         presenter.bindView(this)
 
@@ -108,13 +111,12 @@ class AtolFragment : BaseFragment() {
         if (requestCode == AtolFragment.REQUEST_CONNECT_DEVICE && data.extras != null) {
             presenter.updateSettings(extractSettings(data.extras) ?: "")
             Observable.just(true)
-                    .delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .delay(500, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
                     .doOnNext { presenter.testPrint() }
                     .subscribe({}, Throwable::printStackTrace)
         }
     }
 
-    override fun getTitle(): String {
-        return getString(R.string.equipment_lib_title_atol)
-    }
+    override fun getTitle(): String = getString(R.string.equipment_lib_title_atol)
 }
