@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven'
 
-def currentVersion = '1.3.8'
+def currentVersion = '1.4.0'
 
 android {
     compileSdkVersion 25
@@ -132,24 +132,24 @@ uploadArchives {
             repository(url: userHome)
             // standard pom settings
             pom.project {
-                name 'Equipment name'
-                description 'Equipment description.'
-                url 'https://github.org/mike-stetsenko/equipment'
+                name 'Fiscal print library'
+                description 'Hi-level library 4 printint fiscal receipts via Atol devices etc.'
+                url 'https://github.com/Softbalance/equipment'
                 groupId 'ru.softbalance'
                 artifactId 'equipment'
                 packaging 'aar'
                 version currentVersion
                 licenses {
                     license {
-                        name 'Some license name'
-                        url 'http://www.softbalance.ru'
+                        name 'Apache license 2.0'
+                        url 'https://www.apache.org/licenses/LICENSE-2.0'
                         distribution 'repo'
                     }
                 }
                 developers {
                     developer {
                         id 'sb'
-                        name 'Softbalance Softbalance'
+                        name 'Softbalance Android'
                         email 'gk.softbalance@gmail.com'
                     }
                 }
