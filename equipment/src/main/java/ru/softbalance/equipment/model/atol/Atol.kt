@@ -224,9 +224,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun cancelCheck(): Boolean {
-        setMode(IFptr.MODE_REGISTRATION)
-        driver.CancelCheck().isOK()
-        return true
+        val isSetModeOK = setMode(IFptr.MODE_REGISTRATION)
+        driver.CancelCheck()
+        return isSetModeOK
     }
 
     private fun setClientContact(task: Task): Boolean {
@@ -263,7 +263,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     private fun openCheck(chequeState: Int): Boolean {
         driver.put_CheckType(chequeState)
-        return driver.OpenCheck() == RESULT_OK
+        return driver.OpenCheck().isOK()
     }
 
     private fun printString(task: Task): Boolean {
@@ -317,10 +317,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun setMode(mode: Int): Boolean {
-        if (mode == driver._Mode) {
-            return true
-        }
-
         driver.put_UserPassword(driver._UserPassword)
         driver.put_Mode(mode)
         return driver.SetMode().isOK()
