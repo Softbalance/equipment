@@ -9,6 +9,7 @@ import ru.softbalance.equipment.model.atol.Atol
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment>(context) {
 
@@ -65,8 +66,10 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
         val driver: Atol = Atol(context, settings)
 
         printTest = driver.getSerial(finishAfterExecute = false)
-                .flatMap { serialRes -> serial = serialRes
-                                driver.execute(tasks, finishAfterExecute = false)
+                .delay(300, TimeUnit.MILLISECONDS) // FIXME remove the delay after testing ATOL 15F, this device has bug on frequent switching
+                .flatMap { serialRes ->
+                    serial = serialRes
+                    driver.execute(tasks, finishAfterExecute = false)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
@@ -109,22 +112,24 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         val driver: Atol = Atol(context, settings)
         getFrInfo = driver.getSerial(finishAfterExecute = false)
-                .flatMap { serialRes -> driver.getSessionState(finishAfterExecute = false)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .doOnSuccess { sessionRes ->
-                            view()?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
-                        }
+                .flatMap { serialRes ->
+                    driver.getSessionState(finishAfterExecute = false)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .doOnSuccess { sessionRes ->
+                                view()?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
+                            }
                 }
                 .doOnUnsubscribe {
                     driver.finish()
                     view()?.hideLoading()
                 }
-                .subscribe ({ /* ok */ }, {
-                    err -> view()?.showError(err.message ?: "")
+                .subscribe({ /* ok */ }, {
+                    err ->
+                    view()?.showError(err.message ?: "")
                 })
     }
 
-    fun openShift(){
+    fun openShift() {
         if (openShift.isActive()) {
             return
         }
@@ -137,10 +142,11 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                 .doOnUnsubscribe {
                     view()?.hideLoading()
                 }
-                .subscribe ({
+                .subscribe({
                     view()?.showConfirm("Shift opened")
                 }, {
-                    err -> view()?.showError(err.message ?: "")
+                    err ->
+                    view()?.showError(err.message ?: "")
                 })
     }
 }

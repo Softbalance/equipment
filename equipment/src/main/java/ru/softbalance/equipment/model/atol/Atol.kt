@@ -499,4 +499,3 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return openShiftResponse
     }
 }
-
