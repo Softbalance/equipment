@@ -9,7 +9,6 @@ import ru.softbalance.equipment.model.atol.Atol
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import java.util.concurrent.TimeUnit
 
 class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment>(context) {
 
@@ -66,7 +65,6 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
         val driver: Atol = Atol(context, settings)
 
         printTest = driver.getSerial(finishAfterExecute = false)
-                .delay(300, TimeUnit.MILLISECONDS) // FIXME remove the delay after testing ATOL 15F, this device has bug on frequent switching
                 .flatMap { serialRes ->
                     serial = serialRes
                     driver.execute(tasks, finishAfterExecute = false)
@@ -142,10 +140,14 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
                 .doOnUnsubscribe {
                     view()?.hideLoading()
                 }
-                .subscribe({
-                    view()?.showConfirm("Shift opened")
-                }, {
-                    err ->
+                .subscribe({ res ->
+                    val message = when {
+                        res.shiftAlreadyOpened -> "Shift already opened, it's OK!"
+                        res.shiftExpired24Hours -> "Shift expired please print z-report!"
+                        else -> res.resultInfo
+                    }
+                    view()?.showConfirm(message)
+                }, { err ->
                     view()?.showError(err.message ?: "")
                 })
     }

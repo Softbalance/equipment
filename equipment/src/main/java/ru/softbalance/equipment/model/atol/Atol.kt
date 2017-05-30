@@ -45,6 +45,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     override fun finish() {
         if (driverStatus == DriverStatus.INITIALIZED) {
+            driver.put_DeviceEnabled(false)
             driverStatus = DriverStatus.FINISHED
             try {
                 driver.destroy()
@@ -119,8 +120,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
                 }
             }
         }
-
-        driver.put_DeviceEnabled(false)
 
         val result = EquipmentResponse().successResult() as EquipmentResponse
 
@@ -407,8 +406,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
                     }
                 }
 
-        driver.put_DeviceEnabled(false)
-
         if (finishAfterExecute) {
             finish()
         }
@@ -428,7 +425,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             put_RegisterNumber(SERIAL_REGISTER_INDEX)
             GetRegister()
             serial = _SerialNumber
-            put_DeviceEnabled(false)
         }
         if (finishAfterExecute) {
             finish()
@@ -464,8 +460,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             resultInfo = getInfo()
         }
 
-        driver.put_DeviceEnabled(false)
-
         if (finishAfterExecute) {
             finish()
         }
@@ -486,16 +480,17 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             return OpenShiftResponse().handlingError() as OpenShiftResponse
         }
 
-        prepareRegistration()
-
-        driver.put_DeviceEnabled(false)
-
-        val openShiftResponse = OpenShiftResponse().successResult() as OpenShiftResponse
+        cancelCheck()
+        val openShiftResponse = if (setMode(IFptr.MODE_REGISTRATION) && driver.OpenSession().isOK()){
+            OpenShiftResponse().successResult()
+        } else {
+            OpenShiftResponse().handlingError()
+        }
 
         if (finishAfterExecute) {
             finish()
         }
 
-        return openShiftResponse
+        return openShiftResponse as OpenShiftResponse
     }
 }

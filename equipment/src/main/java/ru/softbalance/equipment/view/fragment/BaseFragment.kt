@@ -29,7 +29,7 @@ abstract class BaseFragment : Fragment(), View {
 
     protected open fun onFinish() {}
 
-    private fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    private fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 
     override fun showError(error: String) = toast(error)
 
