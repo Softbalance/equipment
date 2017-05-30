@@ -2,12 +2,11 @@ package ru.softbalance.equipment.view
 
 import android.app.Activity
 import android.content.Intent
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ru.softbalance.equipment.R
-import ru.softbalance.equipment.databinding.ActivityLibBinding
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import ru.softbalance.equipment.view.fragment.BaseFragment
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
@@ -33,15 +32,14 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
     var port: Int = 0
     var type: Int = 0
 
-    private lateinit var binding: ActivityLibBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         restoreSettings(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView<ActivityLibBinding>(this, R.layout.activity_lib)
+        setContentView(R.layout.activity_lib)
 
-        setSupportActionBar(binding.toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar)
+
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setHomeButtonEnabled(true)
@@ -72,7 +70,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
     override fun onStart() {
         super.onStart()
-        supportFragmentManager.findFragmentById(binding.fragmentContainer.id)?.let {
+        supportFragmentManager.findFragmentById(findViewById(R.id.fragmentContainer).id)?.let {
             supportActionBar?.title = (it as BaseFragment).getTitle()
         }
     }
