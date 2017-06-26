@@ -12,6 +12,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url 'https://maven.google.com' }
         maven { url "https://bitbucket.org/softbalanceandroid/atolprinter/raw/HEAD/maven-repo/" }
         jcenter()
     }
