@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package ru.softbalance.equipment.view.fragment
 
 import android.app.ProgressDialog

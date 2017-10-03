@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.view.fragment.AtolFragment
@@ -38,7 +37,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
         setContentView(R.layout.activity_lib)
 
-        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -70,7 +69,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
     override fun onStart() {
         super.onStart()
-        supportFragmentManager.findFragmentById(findViewById(R.id.fragmentContainer).id)?.let {
+        supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let {
             supportActionBar?.title = (it as BaseFragment).getTitle()
         }
     }

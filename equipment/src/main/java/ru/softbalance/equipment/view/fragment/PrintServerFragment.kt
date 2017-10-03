@@ -90,21 +90,21 @@ class PrintServerFragment : BaseFragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val rootView = inflater.inflate(R.layout.fragment_print_server, container, false)
 
-        url = rootView.findViewById(R.id.ip_address) as EditText
-        port = rootView.findViewById(R.id.port) as EditText
-        deviceTypes = rootView.findViewById(R.id.device_type) as TextView
-        deviceModels = rootView.findViewById(R.id.model) as TextView
-        deviceDrivers = rootView.findViewById(R.id.driver) as TextView
-        saveSettings = rootView.findViewById(R.id.save_settings) as Button
-        settings = rootView.findViewById(R.id.settings_layout) as LinearLayout
+        url = rootView.findViewById(R.id.ip_address)
+        port = rootView.findViewById(R.id.port)
+        deviceTypes = rootView.findViewById(R.id.device_type)
+        deviceModels = rootView.findViewById(R.id.model)
+        deviceDrivers = rootView.findViewById(R.id.driver)
+        saveSettings = rootView.findViewById(R.id.save_settings)
+        settings = rootView.findViewById(R.id.settings_layout)
 
         if (savedInstanceState == null) {
             port.setText(arguments.getInt(PORT_ARG).toString())
             url.setText(arguments.getString(URL_ARG))
         }
 
-        connect = rootView.findViewById(R.id.connect) as Button
-        print = rootView.findViewById(R.id.testPrint) as Button
+        connect = rootView.findViewById(R.id.connect)
+        print = rootView.findViewById(R.id.testPrint)
 
         connect.setOnClickListener { presenter.connect(url.text.toString(), port.text.toString().toInt()) }
         deviceTypes.setOnClickListener { selectDevice() }
@@ -113,8 +113,7 @@ class PrintServerFragment : BaseFragment() {
         saveSettings.setOnClickListener { presenter.saveSettings() }
         print.setOnClickListener { presenter.testPrint() }
 
-        Observable.combineLatest(RxTextView.textChanges(url), RxTextView.textChanges(port)) {
-            urlValue, portValue ->
+        Observable.combineLatest(RxTextView.textChanges(url), RxTextView.textChanges(port)) { urlValue, portValue ->
             urlValue.isNotEmpty()
                     && portValue.isNotEmpty()
                     && HttpUrl.parse(urlValue.toString().toHttpUrl(portValue.toString().toInt())) != null
@@ -208,8 +207,7 @@ class PrintServerFragment : BaseFragment() {
         } else {
             saveSettings.isEnabled = true
 
-            settingsData.filterNotNull()
-                    .sortedBy { it.sort }
+            settingsData.sortedBy { it.sort }
                     .forEach { inflateSettings(it, inflater) }
 
             generateSequence(0) { it + 1 }.take(settings.childCount - 1)
@@ -235,8 +233,7 @@ class PrintServerFragment : BaseFragment() {
             isChecked = vp.value ?: false
             tag = vp.id
             setTag(TAG_SETTINGS_MODEL, vp)
-            setOnCheckedChangeListener {
-                compoundButton, isChecked ->
+            setOnCheckedChangeListener { compoundButton, isChecked ->
                 onBooleanSettingsChecked(compoundButton, isChecked)
             }
         }
@@ -252,7 +249,7 @@ class PrintServerFragment : BaseFragment() {
             setTag(TAG_SETTINGS_MODEL, vp)
             hint = vp.title
         }
-        val editText = til.findViewById(R.id.settings_view) as EditText
+        val editText = til.findViewById<EditText>(R.id.settings_view)
         editText.setText(vp.value)
 
         if (vp.maxLength > 0) {
@@ -280,15 +277,12 @@ class PrintServerFragment : BaseFragment() {
         val settingsGroup = inflater.inflate(R.layout.view_settings_list, container, false) as ViewGroup
         settingsGroup.tag = vp.id
 
-        (settingsGroup.findViewById(R.id.title) as TextView).text = vp.title
+        settingsGroup.findViewById<TextView>(R.id.title).text = vp.title
 
-        val textView = settingsGroup.findViewById(R.id.settings_view) as TextView
+        val textView = settingsGroup.findViewById<TextView>(R.id.settings_view)
         textView.setTag(TAG_SETTINGS_MODEL, vp)
 
-        vp.values
-                .filterNotNull()
-                .filter { listValue -> listValue.valueId == vp.value }
-                .first()
+        vp.values.first { it.valueId == vp.value }
                 .let { listValue -> textView.text = listValue.title }
 
         textView.setOnClickListener { onClickListSettings(textView) }
@@ -300,14 +294,12 @@ class PrintServerFragment : BaseFragment() {
         val vsp = view.getTag(TAG_SETTINGS_MODEL) as ListSettingsPresenter
 
         val popup = ViewUtils.createPopupMenu(activity, view, 0, false)
-        vsp.values
-                .filterNotNull()
-                .forEach { listValue ->
-                    popup.menu.add(0,
-                            listValue.valueId,
-                            listValue.valueId,
-                            listValue.title)
-                }
+        vsp.values.forEach { listValue ->
+            popup.menu.add(0,
+                    listValue.valueId,
+                    listValue.valueId,
+                    listValue.title)
+        }
 
         popup.setOnMenuItemClickListener { item ->
             (view as TextView).text = item.title
@@ -339,8 +331,7 @@ class PrintServerFragment : BaseFragment() {
 
     private fun setupDependency(dep: Dependency<*>) {
         dep.settingsIds
-                .map({ settingsId -> settings.findViewWithTag(settingsId) })
-                .filterNotNull()
+                .mapNotNull { settingsId -> settings.findViewWithTag<View>(settingsId) }
                 .forEach { view -> view.visibility = if (dep.isVisible) View.VISIBLE else View.GONE }
     }
 

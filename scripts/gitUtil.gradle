@@ -9,6 +9,6 @@ ext.gitCommitCount = {
         return commitCount
     }
     catch (ignored) {
-        return 0;
+        return 0
     }
 }

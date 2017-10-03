@@ -56,16 +56,16 @@ class AtolFragment : BaseFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
 
         super.onCreateView(inflater, container, savedInstanceState)
 
-        val rootView = inflater?.inflate(R.layout.fragment_atol, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_atol, container, false)
 
-        connect = rootView?.findViewById(R.id.connectPrinter) as Button
-        print = rootView?.findViewById(R.id.testPrint) as Button
-        getSerial = rootView?.findViewById(R.id.getSerial) as Button
-        openShift = rootView?.findViewById(R.id.openShift) as Button
+        connect = rootView.findViewById(R.id.connectPrinter)
+        print = rootView.findViewById(R.id.testPrint)
+        getSerial = rootView.findViewById(R.id.getSerial)
+        openShift = rootView.findViewById(R.id.openShift)
 
         connect?.setOnClickListener { presenter.startConnection() }
         print?.setOnClickListener { presenter.testPrint() }
