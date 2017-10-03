@@ -9,6 +9,7 @@ import ru.softbalance.equipment.view.View
 
 abstract class BaseFragment : Fragment(), View {
 
+    abstract val title: String
     private var progressDialog: ProgressDialog? = null
 
     protected val hostParent: Any?
@@ -55,6 +56,4 @@ abstract class BaseFragment : Fragment(), View {
     override fun hideLoading() {
         progressDialog?.dismiss()
     }
-
-    abstract fun getTitle(): String
 }

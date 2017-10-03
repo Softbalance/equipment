@@ -8,6 +8,7 @@ import android.widget.Toast
 import ru.softbalance.equipment.view.DriverSetupActivity
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ATOL
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_POSIFLEX
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_SERVER
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SERIAL_ARG
@@ -35,6 +36,12 @@ class MainActivity : AppCompatActivity() {
                     .putExtra(DRIVER_ARG, DRIVER_TYPE_SERVER)
                     .putExtra(URL_ARG, "178.170.230.140")
                     .putExtra(PORT_ARG, 9004),
+                    DRIVER_REQUEST)
+        }
+
+        findViewById<View>(R.id.buttonPosiflex).setOnClickListener {
+            startActivityForResult(Intent(this, DriverSetupActivity::class.java)
+                    .putExtra(DRIVER_ARG, DRIVER_TYPE_POSIFLEX),
                     DRIVER_REQUEST)
         }
     }

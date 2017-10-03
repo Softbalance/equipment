@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.constraint.Group
+                android:id="@+id/groupNetwork"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="hostLayout,portLayout, codePageLayout, codePageInfo" />
+
+            <android.support.constraint.Group
+                android:id="@+id/groupUsb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="usbDeviceName,selectUsbDevice" />
+
+            <TextView
+                android:id="@+id/titleConnectionType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/equipment_libr_title_connection_type"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.design.widget.BottomNavigationView
+                android:id="@+id/connectionType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/titleConnectionType"
+                app:menu="@menu/driver_connection_types" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/hostLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/connectionType">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/host"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/equipment_lib_hint_host"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/portLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hostLayout">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/port"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/equipment_lib_hint_port"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/codePageLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/portLayout">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/codePage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/equipment_lib_hint_printer_code_page"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/codePageInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginRight="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/codePageLayout"
+                app:layout_constraintEnd_toEndOf="@+id/codePageLayout"
+                app:layout_constraintTop_toTopOf="@+id/codePageLayout"
+                app:srcCompat="@drawable/ic_help_24dp"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/usbDeviceName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_constraintBottom_toBottomOf="@+id/selectUsbDevice"
+                app:layout_constraintEnd_toStartOf="@+id/selectUsbDevice"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/selectUsbDevice"
+                tools:text="Posiflex 6900" />
+
+            <ImageButton
+                android:id="@+id/selectUsbDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="0dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/usbDeviceName"
+                app:layout_constraintTop_toBottomOf="@+id/codePageLayout"
+                app:srcCompat="@drawable/ic_options_horiz_primary_24dp"
+                tools:ignore="ContentDescription" />
+
+            <Button
+                android:id="@+id/testPrint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/test_print"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/selectUsbDevice" />
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</layout>

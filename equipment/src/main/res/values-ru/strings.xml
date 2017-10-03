@@ -36,4 +36,11 @@
     <string name="equipment_error_mapping_with_description">Ошибка преобразования данных: %1$s</string>
     <string name="equipment_error_unknown_with_description">Неизвестная ошибка: %1$s</string>
     <string name="open_shift">Открытие смены</string>
+    <string name="equipment_lib_title_posiflex">Posiflex-совместимое устройство</string>
+    <string name="equipment_lib_driver_connection_network">Сеть</string>
+    <string name="equipment_lib_driver_connection_usb">USB</string>
+    <string name="equipment_libr_title_connection_type">Вид подключения</string>
+    <string name="equipment_lib_hint_host">Адрес</string>
+    <string name="equipment_lib_hint_port">Порт</string>
+    <string name="equipment_lib_hint_printer_code_page">Таблица символов cp1251 (Кириллица)</string>
 </resources>

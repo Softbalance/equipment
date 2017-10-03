@@ -375,7 +375,6 @@ class PrintServerFragment : BaseFragment() {
         super.onDestroyView()
     }
 
-    override fun getTitle(): String {
-        return getString(R.string.equipment_lib_title_print_server)
-    }
+    override val title: String
+        get() = getString(R.string.equipment_lib_title_print_server)
 }

@@ -118,5 +118,6 @@ class AtolFragment : BaseFragment() {
         }
     }
 
-    override fun getTitle(): String = getString(R.string.equipment_lib_title_atol)
+    override val title: String
+        get() = getString(R.string.equipment_lib_title_atol)
 }

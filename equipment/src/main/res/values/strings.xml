@@ -36,4 +36,11 @@
     <string name="equipment_error_mapping_with_description">Error while mapping of data: %1$s</string>
     <string name="equipment_error_unknown_with_description">Unknown error: %1$s</string>
     <string name="open_shift">Open shift</string>
+    <string name="equipment_lib_title_posiflex">Posiflex-compatible device</string>
+    <string name="equipment_lib_driver_connection_network">Network</string>
+    <string name="equipment_lib_driver_connection_usb">USB</string>
+    <string name="equipment_libr_title_connection_type">Connection Type</string>
+    <string name="equipment_lib_hint_host">Host</string>
+    <string name="equipment_lib_hint_port">Port</string>
+    <string name="equipment_lib_hint_printer_code_page">Character table code for cp1251 (Cyrillic)</string>
 </resources>
