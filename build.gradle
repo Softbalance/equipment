@@ -2,7 +2,7 @@ apply from: "/scripts/gitUtil.gradle"
 
 buildscript {
     ext.kotlinVersion = '1.1.51'
-    ext.androidPluginVersion = '3.0.0-beta6'
+    ext.androidPluginVersion = '3.0.0-beta7'
     repositories {
         google()
         jcenter()

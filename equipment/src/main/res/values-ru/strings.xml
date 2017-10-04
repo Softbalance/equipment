@@ -43,4 +43,8 @@
     <string name="equipment_lib_hint_host">Адрес</string>
     <string name="equipment_lib_hint_port">Порт</string>
     <string name="equipment_lib_hint_printer_code_page">Таблица символов cp1251 (Кириллица)</string>
+    <string name="equipment_error_method_not_supported">Метод не поддерживается</string>
+    <string name="equipment_error_host_connection_failure">Не удалось подключиться к устройству по указанному адресу</string>
+    <string name="equipment_error_time_out">Превышен интервал ожидания</string>
+    <string name="equipment_error_io_exception">Ошибка связи с устройством: %1$s</string>
 </resources>

@@ -43,4 +43,8 @@
     <string name="equipment_lib_hint_host">Host</string>
     <string name="equipment_lib_hint_port">Port</string>
     <string name="equipment_lib_hint_printer_code_page">Character table code for cp1251 (Cyrillic)</string>
+    <string name="equipment_error_method_not_supported">The method isn\'t supported</string>
+    <string name="equipment_error_host_connection_failure">Failed to connect to a given host</string>
+    <string name="equipment_error_time_out">Time is out</string>
+    <string name="equipment_error_io_exception">Connection failure: %1$s</string>
 </resources>
