@@ -336,14 +336,18 @@ class PrintServerFragment : BaseFragment() {
     }
 
     fun showConnectionState(ok: Boolean) {
-        connect.setCompoundDrawablesWithIntrinsicBounds(null, null,
+        connect.setCompoundDrawablesWithIntrinsicBounds(
                 if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                null,
+                null,
                 null)
     }
 
     fun showPrintState(ok: Boolean) {
-        print.setCompoundDrawablesWithIntrinsicBounds(null, null,
+        print.setCompoundDrawablesWithIntrinsicBounds(
                 if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                null,
+                null,
                 null)
     }
 

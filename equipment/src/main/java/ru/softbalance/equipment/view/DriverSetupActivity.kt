@@ -11,7 +11,10 @@ import ru.softbalance.equipment.view.fragment.BaseFragment
 import ru.softbalance.equipment.view.fragment.PosiflexFragment
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
-class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintServerFragment.Callback {
+class DriverSetupActivity : AppCompatActivity(),
+        AtolFragment.Callback,
+        PrintServerFragment.Callback,
+        PosiflexFragment.Callback {
 
     companion object {
         const val DRIVER_ARG = "DRIVER_ARG"
@@ -50,7 +53,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
             val fr = when (intent.getIntExtra(DRIVER_ARG, DRIVER_TYPE_ATOL)) {
                 DRIVER_TYPE_ATOL -> AtolFragment.newInstance(settings)
                 DRIVER_TYPE_SERVER -> PrintServerFragment.newInstance(url, port, type, settings)
-                DRIVER_TYPE_POSIFLEX -> PosiflexFragment.newInstance()
+                DRIVER_TYPE_POSIFLEX -> PosiflexFragment.newInstance(settings)
                 else -> AtolFragment.newInstance()
             }
 
@@ -99,6 +102,10 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
         this.url = url
         this.port = port
         this.type = type
+    }
+
+    override fun onSettingsSelected(settings: String) {
+        this.settings = settings
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {

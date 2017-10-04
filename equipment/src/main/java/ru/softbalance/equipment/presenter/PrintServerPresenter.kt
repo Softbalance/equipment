@@ -73,25 +73,23 @@ class PrintServerPresenter(context: Context,
     override fun bindView(view: PrintServerFragment) {
         super.bindView(view)
 
-        view()?.let {
-            if (restoreSettingsRequest.isActive()
-                    || deviceRequest.isActive()
-                    || modelRequest.isActive()
-                    || settingsRequest.isActive()
-                    || zipSettingsRequest.isActive()) {
-                it.showLoading(context.getString(R.string.connect_in_progress))
-            } else if (printRequest.isActive()) {
-                it.showLoading(context.getString(R.string.test_print))
-            } else {
-                it.hideLoading()
-            }
+        if (restoreSettingsRequest.isActive()
+                || deviceRequest.isActive()
+                || modelRequest.isActive()
+                || settingsRequest.isActive()
+                || zipSettingsRequest.isActive()) {
+            view.showLoading(context.getString(R.string.connect_in_progress))
+        } else if (printRequest.isActive()) {
+            view.showLoading(context.getString(R.string.test_print))
+        } else {
+            view.hideLoading()
         }
 
         restoreUiState()
     }
 
     fun restoreUiState() {
-        val view = view() ?: return
+        val view = view ?: return
 
         view.showConnectionState(connectedSuccessful)
         driver?.let { view.showDriver(it) }
@@ -128,7 +126,7 @@ class PrintServerPresenter(context: Context,
         if (deviceRequest.isActive()) return
 
         if (HttpUrl.parse(url.toHttpUrl(port)) == null) {
-            view()?.showError(context.getString(R.string.wrong_url_format))
+            view?.showError(context.getString(R.string.wrong_url_format))
             return
         }
 
@@ -138,7 +136,7 @@ class PrintServerPresenter(context: Context,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
-                    view()?.let {
+                    view?.let {
                         it.hideLoading()
                         it.showConnectionState(connectedSuccessful)
                     }
@@ -186,14 +184,14 @@ class PrintServerPresenter(context: Context,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
-                    view()?.let {
+                    view?.let {
                         it.hideLoading()
                         it.showPrintAvailable(isPrintAvailable())
                     }
                 }
                 .subscribe({ settings ->
                     deviceSettings = settings
-                    view()?.buildSettingsUI(settingsList())
+                    view?.buildSettingsUI(settingsList())
                     showResultInfo(settings)
                 }, { handleError(it) })
     }
@@ -219,7 +217,7 @@ class PrintServerPresenter(context: Context,
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
-                    view()?.let {
+                    view?.let {
                         it.hideLoading()
                         it.showPrintAvailable(isPrintAvailable())
                     }
@@ -240,14 +238,14 @@ class PrintServerPresenter(context: Context,
                 Task().apply { type = TaskType.PRINT_FOOTER },
                 Task().apply { type = TaskType.CUT })
 
-        view()?.showLoading(context.getString(R.string.test_print))
+        view?.showLoading(context.getString(R.string.test_print))
 
         printRequest = PrintServer(url, port, zipSettings ?: "")
                 .execute(printTasks, true)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnUnsubscribe {
-                    view()?.let {
+                    view?.let {
                         it.hideLoading()
                         it.showPrintAvailable(isPrintAvailable())
                     }
@@ -255,32 +253,32 @@ class PrintServerPresenter(context: Context,
                 .subscribe({ response ->
                     printSuccessful = response.isSuccess()
                     showResultInfo(response)
-                    view()?.showPrintState(printSuccessful)
+                    view?.showPrintState(printSuccessful)
                 }, { handleError(it) })
     }
 
     private fun showResultInfo(result: EquipmentResponse) {
         if (result.isSuccess()) {
-            view()?.showConfirm(result.resultInfo)
+            view?.showConfirm(result.resultInfo)
         } else {
-            view()?.showError(result.resultInfo)
+            view?.showError(result.resultInfo)
         }
     }
 
     fun selectDeviceType(deviceType: PrintDeviceType) {
         this.deviceType = deviceType
-        view()?.showType(deviceType)
+        view?.showType(deviceType)
         getModelsAndDrivers(deviceType.id)
     }
 
     fun selectModel(model: PrintDeviceModel) {
         this.model = model
-        view()?.showModel(model)
+        view?.showModel(model)
     }
 
     fun selectDriver(driver: PrintDeviceDriver) {
         this.driver = driver
-        view()?.showDriver(driver)
+        view?.showDriver(driver)
         requestSettings(driver.id)
     }
 
@@ -364,11 +362,11 @@ class PrintServerPresenter(context: Context,
 
     private fun handleError(throwable: Throwable?) {
         if (throwable == null) return
-        view()?.showError(exceptionHandler.getUserFriendlyMessage(throwable))
+        view?.showError(exceptionHandler.getUserFriendlyMessage(throwable))
     }
 
     private fun hideLoading() {
-        view()?.hideLoading()
+        view?.hideLoading()
     }
 
     private fun restoreSettingsState() {
@@ -380,7 +378,7 @@ class PrintServerPresenter(context: Context,
     }
 
     private fun showProgress() {
-        view()?.showLoading(context.getString(R.string.connect_in_progress))
+        view?.showLoading(context.getString(R.string.connect_in_progress))
     }
 }
 

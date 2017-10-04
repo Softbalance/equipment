@@ -27,7 +27,7 @@ task clean(type: Delete) {
 
 ext {
     appVersionCode = gitCommitCount()
-    appVersionName = "1.6.0." + appVersionCode
+    appVersionName = "1.6.0"
     appId = "ru.softbalance.equipmentlibrary"
 
     SDKVersion = 26
@@ -45,7 +45,7 @@ ext {
 
     rxJavaVersion = "1.2.3"
     rxAndroidVersion = "1.2.1"
-    rxBinding = "1.0.0"
+    rxBinding = "1.0.1"
 
     flexBoxLayoutVersion = "0.3.0"
 

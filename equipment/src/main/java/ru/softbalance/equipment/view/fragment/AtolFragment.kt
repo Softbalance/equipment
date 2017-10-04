@@ -91,8 +91,10 @@ class AtolFragment : BaseFragment() {
     fun showSettingsState(ok: Boolean) {
         updateResult()
 
-        connect?.setCompoundDrawablesWithIntrinsicBounds(null, null,
+        connect?.setCompoundDrawablesWithIntrinsicBounds(
                 if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                null,
+                null,
                 null)
     }
 
@@ -102,7 +104,7 @@ class AtolFragment : BaseFragment() {
         startActivityForResult(intent, AtolFragment.REQUEST_CONNECT_DEVICE)
     }
 
-    fun extractSettings(data: Bundle?): String? =
+    private fun extractSettings(data: Bundle?): String? =
             if (data != null && data.containsKey(SettingsActivity.DEVICE_SETTINGS))
                 data.getString(SettingsActivity.DEVICE_SETTINGS)
             else null

@@ -47,4 +47,9 @@
     <string name="equipment_error_host_connection_failure">Failed to connect to a given host</string>
     <string name="equipment_error_time_out">Time is out</string>
     <string name="equipment_error_io_exception">Connection failure: %1$s</string>
+    <string name="title_printer_code_page">Characters table</string>
+    <string name="info_printer_code_page">A code (number) of a characters table identifies a code page that printer uses to print text.\n%1$s uses cp1251 code page for printing text.\nIn order to correctly printing this code page you need to set a related code page in your printer.\nUsually Posiflex printers use code 28 and Atol printers use code 6.\nYour printer may have other code. Please read user manual for your device.</string>
+    <string name="equipment_hint_no_usb_devices_connected">There are no connected usb devices.\nPlease check your connection.</string>
+    <string name="equipment_accept_settings">Accept the settings</string>
+    <string name="equipment_device_not_selected">Device isn\'t set</string>
 </resources>

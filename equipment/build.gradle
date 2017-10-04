@@ -15,8 +15,6 @@ android {
         versionName appVersionName
 
         vectorDrawables.useSupportLibrary true
-
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -31,8 +29,8 @@ kapt {
 }
 
 dependencies {
-    implementation project(path: ':usbSerialForAndroid')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api project(path: ':usbSerialForAndroid')
 
     // Kotlin language
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
@@ -40,34 +38,33 @@ dependencies {
     // Android support
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
     implementation "com.android.support:design:$supportLibVersion"
-    implementation "com.android.support:multidex:$multidexVersion"
 
     // Rest adapter
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
-    implementation "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    api "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+    api "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
 
     // HTTP
-    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    api "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    api "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
 
     // Reactive Java
-    implementation "io.reactivex:rxjava:$rxJavaVersion"
-    implementation "io.reactivex:rxandroid:$rxAndroidVersion"
-    implementation "com.jakewharton.rxbinding:rxbinding-appcompat-v7:$rxBinding"
+    api "io.reactivex:rxjava:$rxJavaVersion"
+    api "io.reactivex:rxandroid:$rxAndroidVersion"
+    api "com.jakewharton.rxbinding:rxbinding:$rxBinding"
+    api "com.jakewharton.rxbinding:rxbinding-design:$rxBinding"
 
     // Jackson parser
-    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
+    api "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+    api "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+    api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    api "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 
     // UI
-    compile "com.android.support.constraint:constraint-layout:$constraintVersion"
-    compile "com.google.android:flexbox:$flexBoxLayoutVersion"
+    api "com.android.support.constraint:constraint-layout:$constraintVersion"
 
     // atol driver
-    compile "ru.softbalance.hardware:atolprinter:$atolPrinterVersion"
+    api "ru.softbalance.hardware:atolprinter:$atolPrinterVersion"
 
     // Testing
     testImplementation 'junit:junit:4.12'
@@ -101,7 +98,7 @@ uploadArchives {
                 groupId 'ru.softbalance'
                 artifactId 'equipment'
                 packaging 'aar'
-                version appVersionCode
+                version appVersionName
                 licenses {
                     license {
                         name 'Apache license 2.0'

@@ -47,4 +47,9 @@
     <string name="equipment_error_host_connection_failure">Не удалось подключиться к устройству по указанному адресу</string>
     <string name="equipment_error_time_out">Превышен интервал ожидания</string>
     <string name="equipment_error_io_exception">Ошибка связи с устройством: %1$s</string>
+    <string name="title_printer_code_page">Таблица символов</string>
+    <string name="info_printer_code_page">Код (номер) таблицы символов указывает принтеру, в какой кодировке следует выполнять печать текста.\n%1$s печатает текст в кодировке cp1251.\nДля корректного отображения символов в кодировке PC866 следует указать код таблицы символов, который соответствует кодировке PC866 в вашем принтере.\nОбычно в принтерах Posiflex PC866 имеет код 28.\nВ принтерах документов ATOL код 6.\nВ вашем принтере, могут быть иные значения кодов таблиц символов.\nПожалуйста, ознакомьтесь с руководством пользователя к вашему устройству.</string>
+    <string name="equipment_hint_no_usb_devices_connected">Не обнаружены устройства, подключенные в режиме usb.\nПроверьте подключение устройства.</string>
+    <string name="equipment_accept_settings">Принять настройки</string>
+    <string name="equipment_device_not_selected">Устройство не выбрано</string>
 </resources>

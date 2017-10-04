@@ -13,6 +13,7 @@ import ru.softbalance.equipment.model.posiflex.ports.TcpPort
 import ru.softbalance.equipment.model.posiflex.ports.UsbPort
 import rx.Completable
 import rx.Single
+import rx.schedulers.Schedulers
 import java.io.IOException
 import java.net.ConnectException
 import java.net.NoRouteToHostException
@@ -35,20 +36,28 @@ class Posiflex(private val context: Context,
         private const val CODE_PAGE_1251_ATOL = 6
         private const val CODE_PAGE_1251_POSIFLEX = 28
 
+        private const val PRINT_STRING_TRAIT = "trait"
+        private const val PRINT_STRING_DASH = "dash"
+
+        private const val TRAIT_TEMPLATE = "============================="
+        private const val DASH_TEMPLATE = "------------------------------"
+
         val VENDORS = arrayOf(POSIFLEX_VENDOR_ID, ATOL_VENDOR_ID)
 
         fun init(context: Context, settings: String): EcrDriver? {
-            val settingsData = extractSettings(settings)
+            return init(context, extractSettings(settings))
+        }
 
-            val port = when (settingsData.connectionType) {
-                DeviceConnectionType.NETWORK -> TcpPort(settingsData.host, settingsData.port)
+        fun init(context: Context, settings: Settings): EcrDriver? {
+            val port = when (settings.connectionType) {
+                DeviceConnectionType.NETWORK -> TcpPort(settings.host, settings.port)
                 DeviceConnectionType.USB -> {
                     val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
                     val usbDevice = usbManager.deviceList.values
-                            .firstOrNull { it.vendorId in VENDORS && it.productId == settingsData.productId }
+                            .firstOrNull { it.vendorId in VENDORS && it.productId == settings.productId }
                             ?: return null
 
-                    settingsData.codePage = when (usbDevice.vendorId) {
+                    settings.codePage = when (usbDevice.vendorId) {
                         ATOL_VENDOR_ID -> CODE_PAGE_1251_ATOL
                         else -> CODE_PAGE_1251_POSIFLEX
                     }
@@ -57,7 +66,7 @@ class Posiflex(private val context: Context,
                 }
             }
 
-            return Posiflex(context.applicationContext, port, settingsData)
+            return Posiflex(context.applicationContext, port, settings)
         }
 
         fun extractSettings(settings: String): Settings {
@@ -86,6 +95,7 @@ class Posiflex(private val context: Context,
 
     override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
         return prepare()
+                .subscribeOn(Schedulers.io())
                 .timeout(CONNECTION_TIME_OUT_MILLIS, TimeUnit.MILLISECONDS)
                 .andThen(executeTasks(tasks))
                 .andThen(Completable.fromCallable {
@@ -135,12 +145,38 @@ class Posiflex(private val context: Context,
         }
     }
 
+    private fun printString(task: Task) {
+        val data = task.data.trim()
+
+        if (data.contains(PRINT_STRING_TRAIT, true)) {
+            task.data = TRAIT_TEMPLATE
+            task.param.alignment = Alignment.CENTER
+        } else if (data.contains(PRINT_STRING_DASH, true)) {
+            task.data = DASH_TEMPLATE
+            task.param.alignment = Alignment.CENTER
+        }
+
+        printStringInternal(task)
+    }
+
     private fun cut() {
         writeCommands(createByteArray(0x1D, 0x56, 0x01), 200)
     }
 
-    private fun printString(task: Task) {
-        val font = 0x01 /*normal font*/ or 0x10 /*double high*/ or 0x20 /*double width*/
+    private fun printStringInternal(task: Task) {
+        var font = 0
+
+        if (task.param.bold == true) {
+            font = font or 0x08
+        }
+
+        if (task.param.doubleHeight == true) {
+            font = font or 0x20
+        }
+
+        if (task.param.underline == true) {
+            font = font or 0x80
+        }
 
         val config = createByteArray(
                 0x1B, 0x21, font, // Быстрая настройка шрифта (работает для 2 основных шрифтов, которые в коде идут как FONT_SMALL и FONT_NORMAL)
