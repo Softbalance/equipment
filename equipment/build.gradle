@@ -2,20 +2,19 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven'
-
-def currentVersion = '1.5.0'
+apply from: "../scripts/packageOptions.gradle"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion SDKVersion
+    buildToolsVersion buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 3
-        versionName currentVersion
+        minSdkVersion minSDKVersion
+        targetSdkVersion SDKVersion
+        versionCode appVersionCode
+        versionName appVersionName
 
-        multiDexEnabled true
+        vectorDrawables.useSupportLibrary true
     }
     buildTypes {
         release {
@@ -23,106 +22,66 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-        incremental false
-    }
-    dataBinding {
-        enabled = true
-    }
-    lintOptions {
-        abortOnError false
-    }
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-    }
 }
 
 kapt {
     generateStubs = true
 }
 
-def supportVers = '25.4.0'
-def retrofitVers = '2.1.0'
-def okHttpVers = '3.4.1'
-def jacksonVers = '2.8.4'
-def autoValueVers = '1.3'
-def daggerVers = '2.9'
-def mockitoVers = '2.4.2'
-
 dependencies {
-
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Kotlin language
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
 
     // Android support
-    compile "com.android.support:appcompat-v7:$supportVers"
-    compile "com.android.support:design:$supportVers"
-    compile 'com.android.support:multidex:1.0.0'
-
-    // Data binding
-    kapt "com.android.databinding:compiler:$androidPluginVersion"
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "com.android.support:design:$supportLibVersion"
 
     // Rest adapter
-    compile "com.squareup.retrofit2:retrofit:$retrofitVers"
-    compile "com.squareup.retrofit2:converter-jackson:$retrofitVers"
-    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVers"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
 
-    // HTTP and WS
-    compile "com.squareup.okhttp3:logging-interceptor:$okHttpVers"
-    compile "com.squareup.okhttp3:okhttp-ws:$okHttpVers"
+    // HTTP
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
 
     // Reactive Java
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.3'
-    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
+    implementation "io.reactivex:rxjava:$rxJavaVersion"
+    implementation "io.reactivex:rxandroid:$rxAndroidVersion"
+    implementation "com.jakewharton.rxbinding:rxbinding:$rxBinding"
+    implementation "com.jakewharton.rxbinding:rxbinding-design:$rxBinding"
 
     // Jackson parser
-    compile "com.fasterxml.jackson.core:jackson-core:$jacksonVers"
-    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVers"
-    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVers"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVers"
-
-    // Dagger
-    compile "com.google.dagger:dagger:$daggerVers"
-    kapt "com.google.dagger:dagger-compiler:$daggerVers"
-    provided 'javax.annotation:jsr250-api:1.0'
-
-    // autovalue
-    provided "com.google.auto.value:auto-value:$autoValueVers"
-    kapt "com.google.auto.value:auto-value:$autoValueVers"
-    kapt "com.ryanharter.auto.value:auto-value-parcel:0.2.5"
-    kapt "com.gabrielittner.auto.value:auto-value-with:1.0.0"
-
-    // logging
-    compile 'com.jakewharton.timber:timber:4.5.1'
+    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 
     // UI
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.google.android:flexbox:0.2.6'
+    implementation "com.android.support.constraint:constraint-layout:$constraintVersion"
 
     // atol driver
-    compile 'ru.softbalance.hardware:atolprinter:9.10.0.5560r'
+    api "ru.softbalance.hardware:atolprinter:$atolPrinterVersion"
 
     // Testing
-    kaptTest "com.google.dagger:dagger-compiler:$daggerVers"
-    testCompile 'junit:junit:4.12'
-    testCompile "org.mockito:mockito-core:$mockitoVers"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testImplementation 'junit:junit:4.12'
 
-    kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVers"
-    androidTestCompile "org.mockito:mockito-core:$mockitoVers"
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile "com.android.support:support-annotations:$supportVers"
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation "com.android.support.test:runner:$androidSupportTestVersion"
+    androidTestImplementation "com.android.support.test:rules:$androidSupportTestVersion"
+    androidTestImplementation "com.android.support:multidex:$multidexVersion"
+    androidTestImplementation "com.android.support:multidex-instrumentation:$multidexVersion"
+
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:$espressoVersion") {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 }
 
 uploadArchives {
@@ -138,7 +97,7 @@ uploadArchives {
                 groupId 'ru.softbalance'
                 artifactId 'equipment'
                 packaging 'aar'
-                version currentVersion
+                version appVersionName
                 licenses {
                     license {
                         name 'Apache license 2.0'

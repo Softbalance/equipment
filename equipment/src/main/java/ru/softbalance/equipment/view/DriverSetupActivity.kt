@@ -4,14 +4,17 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ru.softbalance.equipment.R
 import ru.softbalance.equipment.view.fragment.AtolFragment
 import ru.softbalance.equipment.view.fragment.BaseFragment
+import ru.softbalance.equipment.view.fragment.PosiflexFragment
 import ru.softbalance.equipment.view.fragment.PrintServerFragment
 
-class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintServerFragment.Callback {
+class DriverSetupActivity : AppCompatActivity(),
+        AtolFragment.Callback,
+        PrintServerFragment.Callback,
+        PosiflexFragment.Callback {
 
     companion object {
         const val DRIVER_ARG = "DRIVER_ARG"
@@ -21,6 +24,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
         const val DRIVER_TYPE_ATOL = 1
         const val DRIVER_TYPE_SERVER = 2
+        const val DRIVER_TYPE_POSIFLEX = 3
 
         const val SETTINGS_ARG = "SETTINGS_ARG"
         const val SERIAL_ARG = "SERIAL_ARG"
@@ -38,7 +42,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
         setContentView(R.layout.activity_lib)
 
-        setSupportActionBar(findViewById(R.id.toolbar) as Toolbar)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -49,6 +53,7 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
             val fr = when (intent.getIntExtra(DRIVER_ARG, DRIVER_TYPE_ATOL)) {
                 DRIVER_TYPE_ATOL -> AtolFragment.newInstance(settings)
                 DRIVER_TYPE_SERVER -> PrintServerFragment.newInstance(url, port, type, settings)
+                DRIVER_TYPE_POSIFLEX -> PosiflexFragment.newInstance(settings)
                 else -> AtolFragment.newInstance()
             }
 
@@ -70,8 +75,8 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
 
     override fun onStart() {
         super.onStart()
-        supportFragmentManager.findFragmentById(findViewById(R.id.fragmentContainer).id)?.let {
-            supportActionBar?.title = (it as BaseFragment).getTitle()
+        supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let {
+            supportActionBar?.title = (it as BaseFragment).title
         }
     }
 
@@ -97,6 +102,10 @@ class DriverSetupActivity : AppCompatActivity(), AtolFragment.Callback, PrintSer
         this.url = url
         this.port = port
         this.type = type
+    }
+
+    override fun onSettingsSelected(settings: String) {
+        this.settings = settings
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {

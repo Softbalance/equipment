@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Posiflex 6900 -->
+    <usb-device
+        product-id="874"
+        vendor-id="3386" />
+
+    <!-- Posiflex 9000 -->
+    <usb-device
+        product-id="13106"
+        vendor-id="3386" />
+
+    <!-- Posiflex 8800 -->
+    <usb-device
+        product-id="825"
+        vendor-id="3386" />
+
+    <!-- Posiflex 7600X -->
+    <usb-device
+        product-id="901"
+        vendor-id="3386" />
+
+    <!-- Posiflex 6800 -->
+    <usb-device
+        product-id="872"
+        vendor-id="3386" />
+
+    <!-- ATOL RP-326 -->
+    <usb-device
+        product-id="33054"
+        vendor-id="4070" />
+</resources>

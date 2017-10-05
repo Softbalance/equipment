@@ -6,26 +6,19 @@ import java.lang.ref.WeakReference
 
 abstract class Presenter<F : BaseFragment>(context: Context) {
 
-    var viewRef: WeakReference<F> = WeakReference<F>(null)
+    protected var view: F? = null
 
-    fun view(): F? = viewRef.get()
-
-    val context: Context
-
-    init {
-        this.context = context.applicationContext
-    }
+    val context: Context = context.applicationContext
 
     open fun bindView(view: F) {
-        this.viewRef.clear()
-        this.viewRef = WeakReference(view)
+        this.view = view
     }
 
     open fun unbindView(view: F) {
-        if (this.viewRef.get() != null && this.viewRef.get() == view) {
-            this.viewRef.clear()
+        if (this.view == view) {
+            this.view = null
         }
     }
 
-    abstract fun onFinish()
+    open fun onFinish() {}
 }

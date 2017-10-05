@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.IOException
 
+val mapper = JacksonConfigurator.build()
+
 class JacksonConfigurator {
 
     companion object {

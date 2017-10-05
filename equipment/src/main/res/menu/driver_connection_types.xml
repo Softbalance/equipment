@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/type_network"
+        android:icon="@drawable/ic_network_primary_24dp"
+        android:title="@string/equipment_lib_driver_connection_network" />
+    <item
+        android:id="@+id/type_usb"
+        android:icon="@drawable/ic_usb_primary_24dp"
+        android:title="@string/equipment_lib_driver_connection_usb" />
+</menu>

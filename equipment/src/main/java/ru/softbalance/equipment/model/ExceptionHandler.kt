@@ -2,7 +2,7 @@ package ru.softbalance.equipment.model
 
 import android.content.Context
 import com.fasterxml.jackson.databind.JsonMappingException
-import retrofit2.adapter.rxjava.HttpException
+import retrofit2.HttpException
 import ru.softbalance.equipment.R
 import java.net.ConnectException
 import java.net.SocketTimeoutException

@@ -56,16 +56,16 @@ class AtolFragment : BaseFragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): android.view.View? {
 
         super.onCreateView(inflater, container, savedInstanceState)
 
-        val rootView = inflater?.inflate(R.layout.fragment_atol, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_atol, container, false)
 
-        connect = rootView?.findViewById(R.id.connectPrinter) as Button
-        print = rootView?.findViewById(R.id.testPrint) as Button
-        getSerial = rootView?.findViewById(R.id.getSerial) as Button
-        openShift = rootView?.findViewById(R.id.openShift) as Button
+        connect = rootView.findViewById(R.id.connectPrinter)
+        print = rootView.findViewById(R.id.testPrint)
+        getSerial = rootView.findViewById(R.id.getSerial)
+        openShift = rootView.findViewById(R.id.openShift)
 
         connect?.setOnClickListener { presenter.startConnection() }
         print?.setOnClickListener { presenter.testPrint() }
@@ -91,8 +91,10 @@ class AtolFragment : BaseFragment() {
     fun showSettingsState(ok: Boolean) {
         updateResult()
 
-        connect?.setCompoundDrawablesWithIntrinsicBounds(null, null,
+        connect?.setCompoundDrawablesWithIntrinsicBounds(
                 if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                null,
+                null,
                 null)
     }
 
@@ -102,7 +104,7 @@ class AtolFragment : BaseFragment() {
         startActivityForResult(intent, AtolFragment.REQUEST_CONNECT_DEVICE)
     }
 
-    fun extractSettings(data: Bundle?): String? =
+    private fun extractSettings(data: Bundle?): String? =
             if (data != null && data.containsKey(SettingsActivity.DEVICE_SETTINGS))
                 data.getString(SettingsActivity.DEVICE_SETTINGS)
             else null
@@ -118,5 +120,6 @@ class AtolFragment : BaseFragment() {
         }
     }
 
-    override fun getTitle(): String = getString(R.string.equipment_lib_title_atol)
+    override val title: String
+        get() = getString(R.string.equipment_lib_title_atol)
 }

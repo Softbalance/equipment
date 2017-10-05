@@ -2,28 +2,23 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-fileTree('scripts').each { apply from: "${it}" }
-
-def API = 25
-def minAPI = 16
-def appId = 'ru.softbalance.equipmentlibrary'
-def appVersionCode = gitCommitCount()
-def appVersionName = "1.0.0.$appVersionCode"
+apply from: "../scripts/packageOptions.gradle"
 
 android {
-    compileSdkVersion API
-
-    buildToolsVersion '25.0.3'
-
+    compileSdkVersion SDKVersion
+    buildToolsVersion buildToolsVersion
     defaultConfig {
         applicationId appId
-        minSdkVersion minAPI
-        targetSdkVersion API
+        minSdkVersion minSDKVersion
+        targetSdkVersion SDKVersion
         versionCode appVersionCode
         versionName appVersionName
+
         vectorDrawables.useSupportLibrary true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
         multiDexEnabled true
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -40,35 +35,7 @@ android {
         }
     }
 
-    productFlavors {
-        stage {
-            minSdkVersion 21
-            applicationId appId + ".stage"
-        }
-        production {
-            minSdkVersion 16
-            applicationId appId
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-        incremental false
-    }
-
-    dataBinding {
-        enabled = true
-    }
-
-    applicationVariants.all { variant ->
-
-        def filename = "equipment_test-${variant.baseName}-${versionName}.apk"
-
-        variant.outputs.each { output ->
-            output.outputFile = new File(output.outputFile.parent, filename)
-        }
-    }
+    dataBinding.enabled = true
 
     packagingOptions {
         exclude 'LICENSE.txt'
@@ -94,34 +61,35 @@ kapt {
     generateStubs = true
 }
 
-def supportVers = '25.4.0'
-def mockitoVers = '2.4.2'
-
 dependencies {
-
     compile project(':equipment')
 
     // Kotlin language
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
 
     // Android support
-    compile "com.android.support:appcompat-v7:$supportVers"
-    compile "com.android.support:design:$supportVers"
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "com.android.support:design:$supportLibVersion"
     kapt "com.android.databinding:compiler:$androidPluginVersion"
 
     // UI
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation "com.android.support.constraint:constraint-layout:$constraintVersion"
 
     // Testing
-    testCompile 'junit:junit:4.12'
-    testCompile "org.mockito:mockito-core:$mockitoVers"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    testImplementation 'junit:junit:4.12'
 
-    androidTestCompile "org.mockito:mockito-core:$mockitoVers"
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile "com.android.support:support-annotations:$supportVers"
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation "com.android.support.test:runner:$androidSupportTestVersion"
+    androidTestImplementation "com.android.support.test:rules:$androidSupportTestVersion"
+    androidTestImplementation "com.android.support:multidex:$multidexVersion"
+    androidTestImplementation "com.android.support:multidex-instrumentation:$multidexVersion"
+
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:$espressoVersion") {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
 }

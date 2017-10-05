@@ -1,7 +1,10 @@
+apply from: "/scripts/gitUtil.gradle"
+
 buildscript {
-    ext.kotlinVersion = '1.0.6'
-    ext.androidPluginVersion = '2.3.2'
+    ext.kotlinVersion = '1.1.51'
+    ext.androidPluginVersion = '3.0.0-beta7'
     repositories {
+        google()
         jcenter()
     }
     dependencies {
@@ -12,12 +15,46 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://maven.google.com' }
-        maven { url "https://bitbucket.org/softbalanceandroid/atolprinter/raw/HEAD/maven-repo/" }
+        google()
         jcenter()
+        maven { url "https://bitbucket.org/softbalanceandroid/atolprinter/raw/HEAD/maven-repo/" }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+ext {
+    appVersionCode = gitCommitCount()
+    appVersionName = "1.6.0"
+    appId = "ru.softbalance.equipmentlibrary"
+
+    SDKVersion = 26
+    minSDKVersion = 16
+    buildToolsVersion = "26.0.2"
+
+    supportLibVersion = "26.1.0"
+    multidexVersion = "1.0.2"
+    constraintVersion = "1.1.0-beta1"
+
+    retrofitVersion = "2.3.0"
+    okHttpVersion = "3.8.1"
+
+    jacksonVersion = "2.9.0.pr4"
+
+    rxJavaVersion = "1.2.3"
+    rxAndroidVersion = "1.2.1"
+    rxBinding = "1.0.1"
+
+    flexBoxLayoutVersion = "0.3.0"
+
+    atolPrinterVersion = "9.10.0.5560r"
+
+    kotlinMockitoVersion = "1.5.0"
+    mockitoAndroidVersion = "2.8.47"
+
+    androidSupportTestVersion = "1.0"
+    espressoVersion = "3.0.0"
+    jUnitVersion = "4.12"
 }
