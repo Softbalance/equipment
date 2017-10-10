@@ -45,6 +45,15 @@
         <activity
             android:name="com.atol.drivers.fptr.settings.TCPSettingsActivity"
             android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.paycard.settings.SettingsActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.paycard.settings.InpasFPrintPaySettingsActivity"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name="com.atol.drivers.paycard.settings.Arcus2FPrintPaySettingsActivity"
+            android:configChanges="orientation|keyboardHidden" />
 
         <activity android:name="com.atol.drivers.usb.UsbAttachedActivity">
             <intent-filter>
