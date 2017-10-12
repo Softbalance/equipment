@@ -6,14 +6,11 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import com.atol.drivers.fptr.Fptr
-import com.atol.drivers.fptr.IFptr
-import com.atol.drivers.paycard.IPaycard
 import com.atol.drivers.paycard.Paycard
+import ru.softbalance.equipment.model.atol.AtolPayment
 import ru.softbalance.equipment.view.DriverSetupActivity
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ATOL
@@ -23,7 +20,6 @@ import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SERIAL_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.URL_ARG
-import rx.Single
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 
@@ -77,14 +73,20 @@ class MainActivity : AppCompatActivity() {
         buttonAtolPay = findViewById<View>(R.id.buttonAtolPay) as Button
 
         buttonAtolPay.setOnClickListener {
-            paymentTransaction()
-                    .subscribeOn(Schedulers.computation())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe( {
-                        Toast.makeText(this, "finished", Toast.LENGTH_LONG).show()
-                    }, {
-                        Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
-                    })
+            val fptrSettings = getFptrSettings()
+            val paycardSettings = getPaycardSettings()
+            if (fptrSettings != null && paycardSettings != null) {
+                AtolPayment.paymentTransaction(application, fptrSettings, paycardSettings, 101.02)
+                        .subscribeOn(Schedulers.computation())
+                        .flatMap { slipText ->
+                            AtolPayment.printSlip(application, fptrSettings, slipText)}
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            Toast.makeText(this, "finished", Toast.LENGTH_LONG).show()
+                        }, {
+                            Toast.makeText(this, it.message, Toast.LENGTH_LONG).show()
+                        })
+            }
         }
 
         findViewById<View>(R.id.buttonPrinter).setOnClickListener {
@@ -161,131 +163,4 @@ class MainActivity : AppCompatActivity() {
         paycard.destroy()
         return settings
     }
-
-    fun paymentTransaction(): Single<Boolean> = Single.fromCallable {
-        val fptr = Fptr()
-        val paycard = Paycard()
-
-        try {
-            fptr.create(application)
-            paycard.create(application)
-
-            publishProgress("Загрузка настроек...")
-            if (fptr.put_DeviceSettings(getFptrSettings()) < 0) {
-                checkError(fptr)
-            }
-            if (paycard.put_DeviceSettings(getPaycardSettings()) < 0) {
-                checkError(paycard)
-            }
-            paycard.put_PinPadDevice(fptr.get_PinPadDevice())
-            paycard.put_ModemDevice(fptr.get_ModemDevice())
-
-            publishProgress("Установка соединения...")
-            if (fptr.put_DeviceEnabled(true) < 0) {
-                checkError(fptr)
-            }
-            if (paycard.put_DeviceEnabled(true) < 0) {
-                checkError(paycard)
-            }
-            publishProgress("OK")
-
-            publishProgress("Проверка связи с ККМ...")
-            if (fptr.GetStatus() < 0) {
-                checkError(fptr)
-            }
-            publishProgress("OK")
-
-            publishProgress("Продажа...")
-            if (paycard.put_AuthorizationType(IPaycard.AUTHORIZATION_READER_PIN) < 0) {
-                checkError(paycard)
-            }
-            if (paycard.put_OperationType(IPaycard.OPERATION_SUB) < 0) {
-                checkError(paycard)
-            }
-            if (paycard.put_Sum(101.02) < 0) {
-                checkError(paycard)
-            }
-            if (paycard.put_CharLineLength(fptr.get_CharLineLength()) < 0) {
-                checkError(paycard)
-            }
-            if (paycard.PrepareAuthorization() < 0) {
-                checkError(paycard)
-            }
-            if (paycard.Authorization() < 0) {
-                checkError(paycard)
-            }
-            publishProgress("OK")
-
-            publishProgress("Печать слипа...")
-            if (fptr.put_Caption(paycard.get_Text()) < 0) {
-                checkError(fptr)
-            }
-            if (fptr.put_TextWrap(IFptr.WRAP_LINE) < 0) {
-                checkError(fptr)
-            }
-            if (fptr.put_Alignment(IFptr.ALIGNMENT_LEFT) < 0) {
-                checkError(fptr)
-            }
-            if (fptr.PrintString() < 0) {
-                checkError(fptr)
-            }
-            if (fptr.put_Mode(IFptr.MODE_REPORT_NO_CLEAR) < 0) {
-                checkError(fptr)
-            }
-            if (fptr.SetMode() < 0) {
-                checkError(fptr)
-            }
-            if (fptr.PrintFooter() < 0) {
-                checkError(fptr)
-            }
-            publishProgress("OK")
-
-        } catch (e: Exception) {
-            publishProgress(e.toString())
-        } finally {
-            fptr.destroy()
-            paycard.destroy()
-        }
-        true
-    }
-
-    private fun publishProgress(msg: String) {
-        Log.d("MainActivity", msg)
-    }
-
-    @Throws(DriverException::class)
-    private fun checkError(i: IFptr) {
-        val rc = i._ResultCode
-        if (rc < 0) {
-            val rd = i._ResultDescription
-            var bpd: String? = null
-            if (rc == -6) {
-                bpd = i._BadParamDescription
-            }
-            if (bpd != null) {
-                throw DriverException(String.format("[%d] %s (%s)", rc, rd, bpd))
-            } else {
-                throw DriverException(String.format("[%d] %s", rc, rd))
-            }
-        }
-    }
-
-    @Throws(DriverException::class)
-    private fun checkError(i: IPaycard) {
-        val rc = i._ResultCode
-        if (rc < 0) {
-            val rd = i._ResultDescription
-            var bpd: String? = null
-            if (rc == -6) {
-                bpd = i._BadParamDescription
-            }
-            if (bpd != null) {
-                throw DriverException(String.format("[%d] %s (%s)", rc, rd, bpd))
-            } else {
-                throw DriverException(String.format("[%d] %s", rc, rd))
-            }
-        }
-    }
-
-    private class DriverException(msg: String) : Exception(msg)
 }
