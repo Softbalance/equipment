@@ -27,7 +27,7 @@ task clean(type: Delete) {
 
 ext {
     appVersionCode = gitCommitCount()
-    appVersionName = "1.7.1"
+    appVersionName = "1.7.2"
     appId = "ru.softbalance.equipmentlibrary"
 
     SDKVersion = 26

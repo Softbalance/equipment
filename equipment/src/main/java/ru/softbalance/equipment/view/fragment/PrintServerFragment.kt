@@ -210,10 +210,10 @@ class PrintServerFragment : BaseFragment() {
             settingsData.sortedBy { it.sort }
                     .forEach { inflateSettings(it, inflater) }
 
-            generateSequence(0) { it + 1 }.take(settings.childCount - 1)
-                    .map { i -> settings.getChildAt(i) }
-                    .filter { v -> v.tag != null && v.getTag(TAG_SETTINGS_MODEL) != null }
-                    .map { v -> v.getTag(TAG_SETTINGS_MODEL) }
+            (0 until settings.childCount)
+                    .map { settings.getChildAt(it) }
+                    .filter { it.getTag(TAG_SETTINGS_MODEL) != null }
+                    .map { it.getTag(TAG_SETTINGS_MODEL) }
                     .forEach { setupDependencies(it) }
         }
     }
@@ -275,7 +275,7 @@ class PrintServerFragment : BaseFragment() {
                                     vp: ListSettingsPresenter,
                                     container: ViewGroup) {
         val settingsGroup = inflater.inflate(R.layout.view_settings_list, container, false) as ViewGroup
-        settingsGroup.tag = vp.id
+        settingsGroup.setTag(TAG_SETTINGS_MODEL, vp)
 
         settingsGroup.findViewById<TextView>(R.id.title).text = vp.title
 
