@@ -282,8 +282,7 @@ class PrintServerFragment : BaseFragment() {
         val textView = settingsGroup.findViewById<TextView>(R.id.settings_view)
         textView.setTag(TAG_SETTINGS_MODEL, vp)
 
-        vp.values.first { it.valueId == vp.value }
-                .let { listValue -> textView.text = listValue.title }
+        vp.values.firstOrNull { it.valueId == vp.value }?.let { textView.text = it.title }
 
         textView.setOnClickListener { onClickListSettings(textView) }
 

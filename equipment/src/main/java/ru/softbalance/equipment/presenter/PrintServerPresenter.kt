@@ -371,9 +371,9 @@ class PrintServerPresenter(context: Context,
 
     private fun restoreSettingsState() {
         deviceSettings?.let { ds ->
-            deviceType = deviceTypes.find { it.id == ds.typeId }
-            model = models.find { it.id == ds.modelId }
-            driver = drivers.find { it.id == ds.driverId }
+            deviceType = deviceTypes.firstOrNull { it.id == ds.typeId }
+            model = models.firstOrNull { it.id == ds.modelId }
+            driver = drivers.firstOrNull { it.id == ds.driverId }
         }
     }
 

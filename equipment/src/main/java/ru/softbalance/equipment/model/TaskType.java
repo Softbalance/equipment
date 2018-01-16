@@ -42,6 +42,7 @@ public @interface TaskType {
     String REPORT = "report";
     String SYNC_TIME = "synctime";
     String PRINT_HEADER = "printheader";
+    String PRINT_SLIP = "printslip";
     String PRINT_FOOTER = "printfooter";
     String CUT = "cut";
 }

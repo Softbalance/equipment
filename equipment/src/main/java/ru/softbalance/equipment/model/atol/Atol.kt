@@ -146,6 +146,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             TaskType.SYNC_TIME -> syncTime()
             TaskType.PRINT_HEADER, TaskType.PRINT_FOOTER -> printHeader()
             TaskType.CUT -> cut()
+            TaskType.PRINT_SLIP -> printSlip(task)
             else -> {
                 Log.e(Atol::class.java.simpleName,
                         context.getString(R.string.equipment_lib_operation_not_supported, task.type))
@@ -223,9 +224,12 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun cancelCheck(): Boolean {
-        val isSetModeOK = setMode(IFptr.MODE_REGISTRATION)
-        driver.CancelCheck()
-        return isSetModeOK
+        return if (setMode(IFptr.MODE_REGISTRATION)) {
+            driver.CancelCheck()
+            true
+        } else {
+            false
+        }
     }
 
     private fun setClientContact(task: Task): Boolean {
@@ -419,7 +423,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun getSerialInternal(finishAfterExecute: Boolean): String {
-        var serial: String = ""
+        var serial = ""
         driver.run {
             put_DeviceEnabled(true)
             put_RegisterNumber(SERIAL_REGISTER_INDEX)
@@ -481,7 +485,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         }
 
         cancelCheck()
-        val openShiftResponse = if (setMode(IFptr.MODE_REGISTRATION) && driver.OpenSession().isOK()){
+        val openShiftResponse = if (setMode(IFptr.MODE_REGISTRATION) && driver.OpenSession().isOK()) {
             OpenShiftResponse().successResult()
         } else {
             OpenShiftResponse().handlingError()
@@ -493,4 +497,14 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
         return openShiftResponse as OpenShiftResponse
     }
+
+    fun getInternalDriver(): IFptr = driver
+
+    fun printSlip(task: Task) = (driver.put_Caption(task.data).isOK()
+            && driver.put_TextWrap(IFptr.WRAP_LINE).isOK()
+            && driver.put_Alignment(IFptr.ALIGNMENT_LEFT).isOK()
+            && driver.PrintString().isOK()
+            && driver.put_Mode(IFptr.MODE_REPORT_NO_CLEAR).isOK()
+            && driver.SetMode().isOK()
+            && driver.PrintFooter().isOK())
 }
