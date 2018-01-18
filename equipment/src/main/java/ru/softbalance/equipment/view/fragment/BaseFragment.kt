@@ -24,7 +24,7 @@ abstract class BaseFragment : Fragment(), View {
         }
 
     override fun onDestroy() {
-        if (isRemoving || activity.isFinishing) {
+        if (isRemoving || activity?.isFinishing == true) {
             onFinish()
         }
         super.onDestroy()

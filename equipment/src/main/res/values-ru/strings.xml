@@ -52,4 +52,8 @@
     <string name="equipment_hint_no_usb_devices_connected">Не обнаружены устройства, подключенные в режиме usb.\nПроверьте подключение устройства.</string>
     <string name="equipment_accept_settings">Принять настройки</string>
     <string name="equipment_device_not_selected">Устройство не выбрано</string>
+    <string name="incorrect_client_contact">Некорректный контакт клиента</string>
+    <string name="incorrect_cashier_inn">Некорректный ИНН кассира</string>
+    <string name="incorrect_cashier_name">Некорректное имя либо должность кассира</string>
+    <string name="incorrect_payment_place">Некорректное место платежа</string>
 </resources>

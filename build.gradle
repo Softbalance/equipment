@@ -1,7 +1,7 @@
 apply from: "/scripts/gitUtil.gradle"
 
 buildscript {
-    ext.kotlinVersion = '1.2.10'
+    ext.kotlinVersion = '1.2.20'
     ext.androidPluginVersion = '3.0.1'
     repositories {
         google()
@@ -27,14 +27,14 @@ task clean(type: Delete) {
 
 ext {
     appVersionCode = gitCommitCount()
-    appVersionName = "1.7.2"
+    appVersionName = "1.7.3"
     appId = "ru.softbalance.equipmentlibrary"
 
-    SDKVersion = 26
+    SDKVersion = 27
     minSDKVersion = 16
-    buildToolsVersion = "26.0.2"
+    buildToolsVersion = "27.0.2"
 
-    supportLibVersion = "26.1.0"
+    supportLibVersion = "27.0.2"
     multidexVersion = "1.0.2"
     constraintVersion = "1.1.0-beta4"
 

@@ -31,6 +31,21 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import java.util.concurrent.TimeUnit
 
+fun String.toIntOrNull(): Int? = try {
+    this.toInt()
+} catch (e: NumberFormatException) {
+    null
+}
+
+inline fun <T> T.takeIf(predicate: (T) -> Boolean): T? {
+    return if (predicate(this)) this else null
+}
+
+inline fun <T> T.also(block: (T) -> Unit): T {
+    block(this)
+    return this
+}
+
 class PosiflexFragment : BaseFragment() {
 
     interface Callback {
@@ -56,7 +71,7 @@ class PosiflexFragment : BaseFragment() {
 
         val pr = PresentersCache.get(PRESENTER_NAME)
         presenter = if (pr != null) pr as PosiflexPresenter else
-            PresentersCache.add(PRESENTER_NAME, PosiflexPresenter(activity, arguments.getString(DriverSetupActivity.SETTINGS_ARG)))
+            PresentersCache.add(PRESENTER_NAME, PosiflexPresenter(activity!!, arguments?.getString(DriverSetupActivity.SETTINGS_ARG) ?: ""))
     }
 
     override val title: String
@@ -132,7 +147,7 @@ class PosiflexFragment : BaseFragment() {
     }
 
     private fun showCodePageInfoDialog() {
-        AlertDialog.Builder(activity)
+        AlertDialog.Builder(activity!!)
                 .setTitle(R.string.title_printer_code_page)
                 .setMessage(getString(R.string.info_printer_code_page, getString(R.string.app_name)))
                 .setPositiveButton(android.R.string.ok, null)
@@ -140,7 +155,7 @@ class PosiflexFragment : BaseFragment() {
     }
 
     private fun selectUsbDevice(view: View) {
-        val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
         val usbDevices = usbManager.deviceList.values
                 .filter { it.vendorId in Posiflex.VENDORS }
 
@@ -195,7 +210,7 @@ class PosiflexFragment : BaseFragment() {
 
     fun showAcceptationButton(isOK: Boolean, settings: String) {
         testPrintButton.setCompoundDrawablesWithIntrinsicBounds(
-                if (isOK) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                if (isOK) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
                 null,
                 null,
                 null)

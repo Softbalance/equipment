@@ -14,9 +14,23 @@ import java.util.*
 
 class Atol(context: Context, val settings: String) : EcrDriver {
 
+    enum class FFD_VERSION { V_1_0_0, V_1_0_5, V_1_1_0 }
+
     private val context: Context = context.applicationContext
 
     private val driver: IFptr by lazy { prepareDriver() }
+
+    var ffdVersion = FFD_VERSION.V_1_0_0
+        get() {
+            driver.put_RegisterNumber(54)
+            driver.GetRegister()
+            return when (driver._DeviceFfdVersion) {
+                100 -> FFD_VERSION.V_1_0_0
+                105 -> FFD_VERSION.V_1_0_5
+                110 -> FFD_VERSION.V_1_1_0
+                else -> FFD_VERSION.V_1_0_0
+            }
+        }
 
     private var driverStatus = DriverStatus.NOT_INITIALIZED
 
@@ -135,13 +149,13 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             TaskType.REGISTRATION -> registration(task)
             TaskType.CLOSE_CHECK -> closeCheck()
             TaskType.CANCEL_CHECK -> cancelCheck()
-            TaskType.OPEN_CHECK_SELL -> openCheckSell()
+            TaskType.OPEN_CHECK_SELL -> openCheckSell(task)
             TaskType.PAYMENT -> payment(task)
             TaskType.OPEN_CHECK_RETURN -> openCheckReturn()
             TaskType.RETURN -> refund(task)
             TaskType.CASH_INCOME -> cashOperation(IFptr.CASH_INCOME, task)
             TaskType.CASH_OUTCOME -> cashOperation(IFptr.CASH_OUTCOME, task)
-            TaskType.CLIENT_CONTACT -> setClientContact(task)
+            TaskType.CLIENT_CONTACT -> setClientContact(task.data)
             TaskType.REPORT -> report(task)
             TaskType.SYNC_TIME -> syncTime()
             TaskType.PRINT_HEADER, TaskType.PRINT_FOOTER -> printHeader()
@@ -156,7 +170,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun registration(task: Task): Boolean {
-        return prepareItemRegistration(task) && driver.Registration().isOK()
+        return prepareItemRegistration(task) && driver.Registration().isOK() // TODO Registration -> EndItem
     }
 
     private fun refund(task: Task): Boolean {
@@ -196,6 +210,20 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             driver.put_TaxNumber(it)
         }
 
+        task.param.department?.let {
+            driver.put_Department(it)
+        }
+
+        if (ffdVersion == FFD_VERSION.V_1_0_5) {
+            task.param.itemType?.let {
+                driver.put_PositionType(it) // Предмет расчета
+            }
+            task.param.paymentMode?.let {
+                driver.put_PositionPaymentType(it) // Способ расчета
+            }
+            driver.put_TaxMode(0) // set automatic mode
+        }
+
         return true
     }
 
@@ -232,10 +260,13 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         }
     }
 
-    private fun setClientContact(task: Task): Boolean {
-        driver.put_FiscalPropertyNumber(1008)
+    private fun setClientContact(clientContact: String): Boolean =
+            setStringFiscalProperty(1008, clientContact)
+
+    private fun setStringFiscalProperty(code: Int, value: String): Boolean{
+        driver.put_FiscalPropertyNumber(code)
         driver.put_FiscalPropertyType(IFptr.FISCAL_PROPERTY_TYPE_STRING)
-        driver.put_FiscalPropertyValue(task.data)
+        driver.put_FiscalPropertyValue(value)
         return driver.WriteFiscalProperty().isOK()
     }
 
@@ -256,8 +287,43 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return isOK
     }
 
-    private fun openCheckSell(): Boolean {
-        return prepareRegistration() && openCheck(IFptr.CHEQUE_TYPE_SELL)
+    private fun openCheckSell(task: Task): Boolean {
+        val result = prepareRegistration() && openCheck(IFptr.CHEQUE_TYPE_SELL) && initCheckParams(task)
+        if (!result) closeCheck()
+        return result
+    }
+
+    private fun initCheckParams(task: Task): Boolean {
+        task.param.clientContact?.let {
+            if (!setClientContact(it)){
+                lastInfo = context.getString(R.string.incorrect_client_contact)
+                return false
+            }
+        }
+        task.param.cashierINN?.let {
+            if (!setStringFiscalProperty(1203, it)){
+                lastInfo = context.getString(R.string.incorrect_cashier_inn)
+                return false
+            }
+        }
+        val cashier: String = (task.param.cashierName?.trim() ?: "") + " " + (task.param.cashierPosition?.trim() ?: "")
+        if (cashier.isNotBlank()) {
+            if (!setStringFiscalProperty(1021, cashier)){
+                lastInfo = context.getString(R.string.incorrect_cashier_name)
+                return false
+            }
+        }
+        /*
+        FIXME for unknown reasons this operation leads to error «Смена открыта - операция невозможна»
+        driver developers [mailto:a.belikov@atol.ru] didn't say anything useful
+
+        task.param.paymentPlace?.let {
+            if (!setStringFiscalProperty(1187, it)){
+                lastInfo = context.getString(R.string.incorrect_payment_place)
+                return false
+            }
+        }*/
+        return true
     }
 
     private fun openCheckReturn(): Boolean {
@@ -285,7 +351,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     private fun printSimpleString(task: Task): Boolean {
         val params = task.param
-        driver.put_TextWrap(if (params.wrap ?: false) IFptr.WRAP_WORD else IFptr.WRAP_NONE)
+        driver.put_TextWrap(if (params.wrap == true) IFptr.WRAP_WORD else IFptr.WRAP_NONE)
 
         if (driver._TextWrap == IFptr.WRAP_NONE && task.data.length > driver._CharLineLength) {
             driver.put_Caption(task.data.substring(0, driver._CharLineLength))

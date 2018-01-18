@@ -76,10 +76,10 @@ class PrintServerFragment : BaseFragment() {
 
         var pr = PresentersCache.get(PRESENTER_NAME)
         if (pr == null) {
-            pr = PrintServerPresenter(activity,
-                    arguments.getString(URL_ARG),
-                    arguments.getInt(PORT_ARG),
-                    arguments.getString(SETTINGS_ARG))
+            pr = PrintServerPresenter(activity!!,
+                    arguments?.getString(URL_ARG) ?: "",
+                    arguments?.getInt(PORT_ARG) ?: 0,
+                    arguments?.getString(SETTINGS_ARG) ?: "")
 
             PresentersCache.add(PRESENTER_NAME, pr)
         }
@@ -99,8 +99,8 @@ class PrintServerFragment : BaseFragment() {
         settings = rootView.findViewById(R.id.settings_layout)
 
         if (savedInstanceState == null) {
-            port.setText(arguments.getInt(PORT_ARG).toString())
-            url.setText(arguments.getString(URL_ARG))
+            port.setText(arguments?.getInt(PORT_ARG).toString())
+            url.setText(arguments?.getString(URL_ARG))
         }
 
         connect = rootView.findViewById(R.id.connect)
@@ -132,7 +132,7 @@ class PrintServerFragment : BaseFragment() {
                 callback.onSettingsSelected(settings,
                         presenter.url,
                         presenter.port,
-                        presenter.deviceType?.id ?: arguments.getInt(EQUIPMENT_TYPE_ARG))
+                        presenter.deviceType?.id ?: arguments?.getInt(EQUIPMENT_TYPE_ARG) ?: 0)
             }
         }
     }
@@ -336,7 +336,7 @@ class PrintServerFragment : BaseFragment() {
 
     fun showConnectionState(ok: Boolean) {
         connect.setCompoundDrawablesWithIntrinsicBounds(
-                if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                if (ok) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
                 null,
                 null,
                 null)
@@ -344,7 +344,7 @@ class PrintServerFragment : BaseFragment() {
 
     fun showPrintState(ok: Boolean) {
         print.setCompoundDrawablesWithIntrinsicBounds(
-                if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                if (ok) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
                 null,
                 null,
                 null)

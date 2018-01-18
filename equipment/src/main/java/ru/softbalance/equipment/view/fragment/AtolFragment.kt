@@ -45,7 +45,7 @@ class AtolFragment : BaseFragment() {
 
         val pr = PresentersCache.get(PRESENTER_NAME)
         presenter = if (pr != null) pr as AtolPresenter else
-            PresentersCache.add(PRESENTER_NAME, AtolPresenter(activity, arguments.getString(SETTINGS_ARG)))
+            PresentersCache.add(PRESENTER_NAME, AtolPresenter(activity!!, arguments?.getString(SETTINGS_ARG) ?: ""))
 
         updateResult()
     }
@@ -92,7 +92,7 @@ class AtolFragment : BaseFragment() {
         updateResult()
 
         connect?.setCompoundDrawablesWithIntrinsicBounds(
-                if (ok) ContextCompat.getDrawable(activity, R.drawable.ic_confirm_selector) else null,
+                if (ok) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
                 null,
                 null,
                 null)

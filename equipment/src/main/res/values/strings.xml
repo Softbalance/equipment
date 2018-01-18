@@ -52,4 +52,8 @@
     <string name="equipment_hint_no_usb_devices_connected">There are no connected usb devices.\nPlease check your connection.</string>
     <string name="equipment_accept_settings">Accept the settings</string>
     <string name="equipment_device_not_selected">Device isn\'t set</string>
+    <string name="incorrect_client_contact">Incorrect client contact</string>
+    <string name="incorrect_cashier_inn">Incorrect cashier INN</string>
+    <string name="incorrect_cashier_name">Incorrect cashier name or position</string>
+    <string name="incorrect_payment_place">Incorrect payment place</string>
 </resources>

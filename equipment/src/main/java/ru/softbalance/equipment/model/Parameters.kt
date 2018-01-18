@@ -51,7 +51,7 @@ class Parameters {
 
     var quantity: BigDecimal? = null
 
-    var department: String? = null
+    var department: Int? = null
 
     @JsonProperty("Summ")
     var sum: BigDecimal? = null
@@ -67,4 +67,18 @@ class Parameters {
 
     @ReportType
     var reportType: Int? = null
+
+    var itemType: Int? = null // предмет расчета
+
+    var paymentMode: Int? = null // способ расчета
+
+    var clientContact: String? = null
+
+    var cashierINN: String? = null
+
+    var cashierPosition: String? = null
+
+    var cashierName: String? = null
+
+    var paymentPlace: String? = null
 }
