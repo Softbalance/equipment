@@ -32,7 +32,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             }
         }
 
-    private var driverStatus = DriverStatus.NOT_INITIALIZED
+    var driverStatus = DriverStatus.NOT_INITIALIZED
 
     private var lastInfo = ""
 
@@ -41,7 +41,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
         private const val TAX_INDEX = 201
         private const val TAX_FIRST = 1
-        private const val TAX_LAST = 5
+        private const val TAX_LAST = 6
 
         private const val SERIAL_REGISTER_INDEX = 22
 
@@ -466,7 +466,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             throw RuntimeException(getInfo())
         }
 
-        val taxes = TAX_FIRST.rangeTo(TAX_LAST)
+        val taxes = (TAX_FIRST .. TAX_LAST)
                 .map { index ->
                     Tax().apply {
                         id = index.toLong()
