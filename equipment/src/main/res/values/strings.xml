@@ -56,4 +56,5 @@
     <string name="incorrect_cashier_inn">Incorrect cashier INN</string>
     <string name="incorrect_cashier_name">Incorrect cashier name or position</string>
     <string name="incorrect_payment_place">Incorrect payment place</string>
+    <string name="hint_offset_lines">Offset for header and footer</string>
 </resources>

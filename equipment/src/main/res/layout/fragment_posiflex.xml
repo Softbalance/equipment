@@ -64,8 +64,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/equipment_lib_hint_host"
-                    android:inputType="text"
                     android:imeOptions="actionNext"
+                    android:inputType="text"
                     android:maxLines="1" />
 
             </android.support.design.widget.TextInputLayout>
@@ -86,29 +86,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/equipment_lib_hint_port"
-                    android:imeOptions="actionNext"
-                    android:inputType="number"
-                    android:maxLength="5"
-                    android:maxLines="1" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/codePageLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/portLayout">
-
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/codePage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/equipment_lib_hint_printer_code_page"
                     android:imeOptions="actionNext"
                     android:inputType="number"
                     android:maxLength="5"
@@ -165,6 +142,52 @@
                 app:srcCompat="@drawable/ic_options_horiz_primary_24dp"
                 tools:ignore="ContentDescription" />
 
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/codePageLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/portLayout">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/codePage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/equipment_lib_hint_printer_code_page"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/offsetInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/selectUsbDevice">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/offsetInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_offset_lines"
+                    android:imeOptions="actionNext"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
             <Button
                 android:id="@+id/testPrint"
                 android:layout_width="wrap_content"
@@ -174,7 +197,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/selectUsbDevice" />
+                app:layout_constraintTop_toBottomOf="@+id/offsetInputLayout" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

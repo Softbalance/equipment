@@ -23,9 +23,10 @@ import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-class Posiflex(private val context: Context,
-               private val port: Port,
-               settings: Settings) : EcrDriver {
+class Posiflex(
+    private val context: Context,
+    private val port: Port,
+    private val settings: Settings) : EcrDriver {
 
     companion object {
         private const val CONNECTION_TIME_OUT_MILLIS = 3000L
@@ -54,7 +55,7 @@ class Posiflex(private val context: Context,
                 DeviceConnectionType.USB -> {
                     val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
                     val usbDevice = usbManager.deviceList.values
-                            .firstOrNull { it.vendorId in VENDORS && it.productId == settings.productId }
+                        .firstOrNull { it.vendorId in VENDORS && it.productId == settings.productId }
                             ?: return null
 
                     settings.codePage = when (usbDevice.vendorId) {
@@ -85,35 +86,39 @@ class Posiflex(private val context: Context,
     private var isInitialized = false
 
     private val beginCommand = createByteArray(
-            0x1B, 0x74, settings.codePage, // Установка кодировки принтера
-            0x1B, 0x52, 0x00  // Установка набора символов (USA)
+        0x1B, 0x74, settings.codePage, // Установка кодировки принтера
+        0x1B, 0x52, 0x00  // Установка набора символов (USA)
     )
 
     private val endCommand = createByteArray(
-            0x1D, 0x61, 0x00 // Отключение автоматической отправки статуса (по документации - также чистит буффер принтера)
+        0x1D,
+        0x61,
+        0x00 // Отключение автоматической отправки статуса (по документации - также чистит буффер принтера)
     )
 
-    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
+    override fun execute(
+        tasks: List<Task>,
+        finishAfterExecute: Boolean): Single<EquipmentResponse> {
         return prepare()
-                .subscribeOn(Schedulers.io())
-                .timeout(CONNECTION_TIME_OUT_MILLIS, TimeUnit.MILLISECONDS)
-                .andThen(executeTasks(tasks))
-                .andThen(Completable.fromCallable {
-                    if (finishAfterExecute) {
-                        finish()
-                    }
-                })
-                .toSingle {
-                    val response = EquipmentResponse()
-                    response.resultCode = ResponseCode.SUCCESS
-                    response
+            .subscribeOn(Schedulers.io())
+            .timeout(CONNECTION_TIME_OUT_MILLIS, TimeUnit.MILLISECONDS)
+            .andThen(executeTasks(tasks))
+            .andThen(Completable.fromCallable {
+                if (finishAfterExecute) {
+                    finish()
                 }
-                .onErrorReturn { exception ->
-                    val response = EquipmentResponse()
-                    response.resultCode = ResponseCode.HANDLING_ERROR
-                    response.resultInfo = buildMessageByException(exception)
-                    response
-                }
+            })
+            .toSingle {
+                val response = EquipmentResponse()
+                response.resultCode = ResponseCode.SUCCESS
+                response
+            }
+            .onErrorReturn { exception ->
+                val response = EquipmentResponse()
+                response.resultCode = ResponseCode.HANDLING_ERROR
+                response.resultInfo = buildMessageByException(exception)
+                response
+            }
     }
 
     private fun executeTasks(tasks: List<Task>) = Completable.fromCallable {
@@ -122,7 +127,9 @@ class Posiflex(private val context: Context,
             try {
                 executeTask(task)
             } catch (e: Exception) {
-                throw ExecuteException("Failed to execute task ${task.type}. ${buildMessageByException(e)}")
+                throw ExecuteException(
+                    "Failed to execute task ${task.type}. ${buildMessageByException(
+                        e)}")
             }
         }
         port.write(endCommand)
@@ -138,11 +145,22 @@ class Posiflex(private val context: Context,
         when (task.type.toLowerCase()) {
             TaskType.STRING -> printString(task)
             TaskType.CUT -> cut()
+            TaskType.PRINT_FOOTER, TaskType.PRINT_HEADER -> printOffset()
             else -> {
-                Log.e(Atol::class.java.simpleName,
-                        context.getString(R.string.equipment_lib_operation_not_supported, task.type))
+                Log.e(
+                    Atol::class.java.simpleName,
+                    context.getString(R.string.equipment_lib_operation_not_supported, task.type))
             }
         }
+    }
+
+    private fun printOffset() {
+        (1..settings.offsetHeaderBottom)
+            .forEach {
+                val offsetTask = Task()
+                offsetTask.data = " "
+                printStringInternal(offsetTask)
+            }
     }
 
     private fun printString(task: Task) {
@@ -179,8 +197,12 @@ class Posiflex(private val context: Context,
         }
 
         val config = createByteArray(
-                0x1B, 0x21, font, // Быстрая настройка шрифта (работает для 2 основных шрифтов, которые в коде идут как FONT_SMALL и FONT_NORMAL)
-                0x1B, 0x61, convertAlign(task.param.alignment ?: Alignment.LEFT)
+            0x1B,
+            0x21,
+            font, // Быстрая настройка шрифта (работает для 2 основных шрифтов, которые в коде идут как FONT_SMALL и FONT_NORMAL)
+            0x1B,
+            0x61,
+            convertAlign(task.param.alignment ?: Alignment.LEFT)
         )
 
         // На деле такой кодировки в системе может не оказаться (встречал такие образы Android),
@@ -207,7 +229,9 @@ class Posiflex(private val context: Context,
         return if (e is UnknownHostException || e is ConnectException || e is NoRouteToHostException)
             context.getString(R.string.equipment_error_host_connection_failure)
         else if (e is SocketTimeoutException || e is TimeoutException) context.getString(R.string.equipment_error_time_out)
-        else if (e is IOException) context.getString(R.string.equipment_error_io_exception, e.toString())
+        else if (e is IOException) context.getString(
+            R.string.equipment_error_io_exception,
+            e.toString())
         else if (e is ExecuteException) {
             e.message ?: e.toString()
         } else {
@@ -220,12 +244,14 @@ class Posiflex(private val context: Context,
     }
 
     override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
-        val accessException = IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+        val accessException =
+            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
         return Single.error<SessionStateResponse>(accessException)
     }
 
     override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
-        val accessException = IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+        val accessException =
+            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
         return Single.error<OpenShiftResponse>(accessException)
     }
 

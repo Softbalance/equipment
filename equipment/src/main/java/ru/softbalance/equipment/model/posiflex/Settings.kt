@@ -5,20 +5,22 @@ import android.os.Parcelable
 import ru.softbalance.equipment.model.DeviceConnectionType
 
 data class Settings(
-        var connectionType: DeviceConnectionType = DeviceConnectionType.NETWORK,
-        var productId: Int = 0,
-        var deviceName: String = "",
-        var host: String = "192.168.",
-        var port: Int = 9100,
-        var codePage: Int = 28
-) : Parcelable {
+    var connectionType: DeviceConnectionType = DeviceConnectionType.NETWORK,
+    var productId: Int = 0,
+    var deviceName: String = "",
+    var host: String = "192.168.",
+    var port: Int = 9100,
+    var codePage: Int = 28,
+    var offsetHeaderBottom: Int = 0) : Parcelable {
+
     constructor(source: Parcel) : this(
-            DeviceConnectionType.values()[source.readInt()],
-            source.readInt(),
-            source.readString(),
-            source.readString(),
-            source.readInt(),
-            source.readInt()
+        DeviceConnectionType.values()[source.readInt()],
+        source.readInt(),
+        source.readString(),
+        source.readString(),
+        source.readInt(),
+        source.readInt(),
+        source.readInt()
     )
 
     override fun describeContents() = 0
@@ -30,6 +32,7 @@ data class Settings(
         writeString(host)
         writeInt(port)
         writeInt(codePage)
+        writeInt(offsetHeaderBottom)
     }
 
     companion object {

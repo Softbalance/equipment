@@ -127,4 +127,8 @@ class PosiflexPresenter(context: Context, settings: String) : Presenter<Posiflex
     fun onCodePageInput(codePage: Int) {
         settings.codePage = codePage
     }
+
+    fun onChangeOffset(value: Int) {
+        settings.offsetHeaderBottom = value
+    }
 }

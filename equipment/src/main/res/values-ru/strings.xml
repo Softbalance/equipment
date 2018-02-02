@@ -56,4 +56,5 @@
     <string name="incorrect_cashier_inn">Некорректный ИНН кассира</string>
     <string name="incorrect_cashier_name">Некорректное имя либо должность кассира</string>
     <string name="incorrect_payment_place">Некорректное место платежа</string>
+    <string name="hint_offset_lines">Отступ для шапки и подвала</string>
 </resources>

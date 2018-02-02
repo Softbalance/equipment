@@ -12,6 +12,6 @@ class Task {
     var type: String = TaskType.STRING
 
     @JsonProperty("Param")
-    @JsonFormat(with = arrayOf(JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES))
+    @JsonFormat(with = [JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES])
     var param: Parameters = Parameters()
 }

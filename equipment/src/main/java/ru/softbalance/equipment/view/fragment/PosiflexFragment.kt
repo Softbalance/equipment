@@ -88,6 +88,7 @@ class PosiflexFragment : BaseFragment() {
     private lateinit var codePageInfo: View
     private lateinit var networkGroup: Group
     private lateinit var usbGroup: Group
+    private lateinit var offsetInput: EditText
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_posiflex, container, false)
@@ -103,6 +104,7 @@ class PosiflexFragment : BaseFragment() {
         codePageInfo = view.findViewById(R.id.codePageInfo)
         networkGroup = view.findViewById(R.id.groupNetwork)
         usbGroup = view.findViewById(R.id.groupUsb)
+        offsetInput = view.findViewById(R.id.offsetInput)
 
         RxTextView.textChanges(hostInput).skip(1)
                 .debounce(300, TimeUnit.MILLISECONDS)
@@ -121,6 +123,12 @@ class PosiflexFragment : BaseFragment() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { presenter.onCodePageInput(it.toString().toIntOrNull() ?: 0) }
                 .also { autoDisposable.add(it) }
+
+        RxTextView.textChanges(offsetInput).skip(1)
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { presenter.onChangeOffset(it.toString().toIntOrNull() ?: 0) }
+            .also { autoDisposable.add(it) }
 
         RxBottomNavigationView.itemSelections(connectionTypeNavigationView).skip(1)
                 .map {
