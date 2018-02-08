@@ -6,7 +6,7 @@ interface EcrDriver {
 
     fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse>
 
-    fun getSerial(finishAfterExecute: Boolean): Single<String>
+    fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse>
 
     fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse>
 

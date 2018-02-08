@@ -239,8 +239,8 @@ class Posiflex(
         }
     }
 
-    override fun getSerial(finishAfterExecute: Boolean): Single<String> {
-        return Single.just("")
+    override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> {
+        return Single.just(SerialResponse())
     }
 
     override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {

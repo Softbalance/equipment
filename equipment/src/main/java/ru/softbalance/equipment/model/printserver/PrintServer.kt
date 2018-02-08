@@ -18,20 +18,22 @@ import rx.Single
 
 class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
 
-    override fun getSerial(finishAfterExecute: Boolean): Single<String> {
-        return Single.just ("getInfo is not implemented for PrintServer")
+    override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> {
+        return Single.just(SerialResponse().apply {
+            resultInfo = "getInfo is not implemented for PrintServer"
+        })
     }
 
     val api: PrintServerApi
 
     init {
         api = Retrofit.Builder()
-                .baseUrl(url.toHttpUrl(port))
-                .client(getClient())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .addConverterFactory(JacksonConverterFactory.create(JacksonConfigurator.build()))
-                .build()
-                .create(PrintServerApi::class.java)
+            .baseUrl(url.toHttpUrl(port))
+            .client(getClient())
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addConverterFactory(JacksonConverterFactory.create(JacksonConfigurator.build()))
+            .build()
+            .create(PrintServerApi::class.java)
     }
 
     private fun getClient(): OkHttpClient {
@@ -42,9 +44,10 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
         return builder.build()
     }
 
-    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
+    override fun execute(tasks: List<Task>,
+                         finishAfterExecute: Boolean): Single<EquipmentResponse> {
         return Single.fromCallable { TasksRequest(tasks, settings) }
-                .flatMap { api.execute(it).toSingle() }
+            .flatMap { api.execute(it).toSingle() }
     }
 
     fun getTaxes(): Observable<TaxesResponse> {
@@ -53,12 +56,12 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
 
     override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
         return Single.just(SessionStateResponse()
-                .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
+            .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
     }
 
     override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
         return Single.just(OpenShiftResponse()
-                .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
+            .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
     }
 
     override fun finish() {

@@ -65,7 +65,7 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         printTest = driver.getSerial(finishAfterExecute = false)
                 .flatMap { serialRes ->
-                    serial = serialRes
+                    serial = serialRes.resultInfo
                     driver.execute(tasks, finishAfterExecute = false)
                 }
                 .observeOn(AndroidSchedulers.mainThread())

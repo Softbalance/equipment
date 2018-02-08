@@ -52,9 +52,10 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         private const val DASH_TEMPLATE = "--------------------------------------------------"
     }
 
-    override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
+    override fun execute(tasks: List<Task>,
+                         finishAfterExecute: Boolean): Single<EquipmentResponse> {
         return Single.fromCallable { executeTasksInternal(tasks, finishAfterExecute) }
-                .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
     }
 
     override fun finish() {
@@ -94,9 +95,10 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             info = lastInfo
             lastInfo = ""
         } else {
-            info = context.getString(R.string.equipment_error_code,
-                    driver._ResultCode,
-                    driver._ResultDescription)
+            info = context.getString(
+                R.string.equipment_error_code,
+                driver._ResultCode,
+                driver._ResultDescription)
         }
 
         return info
@@ -117,7 +119,8 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         resultInfo = getInfo()
     }
 
-    private fun executeTasksInternal(tasks: List<Task>, finishAfterExecute: Boolean): EquipmentResponse {
+    private fun executeTasksInternal(tasks: List<Task>,
+                                     finishAfterExecute: Boolean): EquipmentResponse {
         if (driverStatus == DriverStatus.FINISHED) {
             return EquipmentResponse().initFailure() as EquipmentResponse
         }
@@ -164,8 +167,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             TaskType.CUT -> cut()
             TaskType.PRINT_SLIP -> printSlip(task)
             else -> {
-                Log.e(Atol::class.java.simpleName,
-                        context.getString(R.string.equipment_lib_operation_not_supported, task.type))
+                Log.e(
+                    Atol::class.java.simpleName,
+                    context.getString(R.string.equipment_lib_operation_not_supported, task.type))
                 return true
             }
         }
@@ -263,9 +267,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun setClientContact(clientContact: String): Boolean =
-            setStringFiscalProperty(1008, clientContact)
+        setStringFiscalProperty(1008, clientContact)
 
-    private fun setStringFiscalProperty(code: Int, value: String): Boolean{
+    private fun setStringFiscalProperty(code: Int, value: String): Boolean {
         driver.put_FiscalPropertyNumber(code)
         driver.put_FiscalPropertyType(IFptr.FISCAL_PROPERTY_TYPE_STRING)
         driver.put_FiscalPropertyValue(value)
@@ -290,27 +294,30 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun openCheckSell(task: Task): Boolean {
-        val result = prepareRegistration() && openCheck(IFptr.CHEQUE_TYPE_SELL) && initCheckParams(task)
+        val result =
+            prepareRegistration() && openCheck(IFptr.CHEQUE_TYPE_SELL) && initCheckParams(task)
         if (!result) closeCheck()
         return result
     }
 
     private fun initCheckParams(task: Task): Boolean {
         task.param.clientContact?.let {
-            if (!setClientContact(it)){
+            if (!setClientContact(it)) {
                 lastInfo = context.getString(R.string.incorrect_client_contact)
                 return false
             }
         }
         task.param.cashierINN?.let {
-            if (!setStringFiscalProperty(1203, it)){
+            if (!setStringFiscalProperty(1203, it)) {
                 lastInfo = context.getString(R.string.incorrect_cashier_inn)
                 return false
             }
         }
-        val cashier: String = (task.param.cashierName?.trim() ?: "") + " " + (task.param.cashierPosition?.trim() ?: "")
+        val cashier: String =
+            (task.param.cashierName?.trim() ?: "") + " " + (task.param.cashierPosition?.trim()
+                    ?: "")
         if (cashier.isNotBlank()) {
-            if (!setStringFiscalProperty(1021, cashier)){
+            if (!setStringFiscalProperty(1021, cashier)) {
                 lastInfo = context.getString(R.string.incorrect_cashier_name)
                 return false
             }
@@ -413,7 +420,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             ReportType.REPORT_CASHIERS -> IFptr.REPORT_CASHIERS
             ReportType.REPORT_HOURS -> IFptr.REPORT_HOURS
             else -> {
-                Log.e(Atol::class.java.simpleName, "The report operation ${task.param.reportType} isn't supported")
+                Log.e(
+                    Atol::class.java.simpleName,
+                    "The report operation ${task.param.reportType} isn't supported")
                 return false
             }
         }
@@ -452,7 +461,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     fun getTaxes(finishAfterExecute: Boolean): Observable<List<Tax>> {
         return Observable.fromCallable { getTaxesInternal(finishAfterExecute) }
-                .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
     }
 
     private fun getTaxesInternal(finishAfterExecute: Boolean): List<Tax> {
@@ -468,15 +477,15 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             throw RuntimeException(getInfo())
         }
 
-        val taxes = (TAX_FIRST .. TAX_LAST)
-                .map { index ->
-                    Tax().apply {
-                        id = index.toLong()
-                        driver.put_CaptionPurpose(index + TAX_INDEX)
-                        driver.GetCaption()
-                        title = driver._Caption
-                    }
+        val taxes = (TAX_FIRST..TAX_LAST)
+            .map { index ->
+                Tax().apply {
+                    id = index.toLong()
+                    driver.put_CaptionPurpose(index + TAX_INDEX)
+                    driver.GetCaption()
+                    title = driver._Caption
                 }
+            }
 
         driver.put_DeviceEnabled(false)
 
@@ -487,28 +496,40 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return taxes
     }
 
-    override fun getSerial(finishAfterExecute: Boolean): Single<String> {
+    override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> {
         return Single.fromCallable { getSerialInternal(finishAfterExecute) }
-                .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
     }
 
-    private fun getSerialInternal(finishAfterExecute: Boolean): String {
-        var serial = ""
+    private fun getSerialInternal(finishAfterExecute: Boolean): SerialResponse {
+        var currentSerial = ""
         driver.run {
-            put_DeviceEnabled(true)
+
+            if (driver.put_DeviceEnabled(true).isFail()) {
+                return SerialResponse().handlingError() as SerialResponse
+            }
+
             put_RegisterNumber(SERIAL_REGISTER_INDEX)
             GetRegister()
-            serial = _SerialNumber
+            currentSerial = _SerialNumber
         }
         if (finishAfterExecute) {
             finish()
         }
-        return serial
+
+        return if (currentSerial.isNotBlank()) {
+            SerialResponse().apply {
+                resultCode = ResponseCode.SUCCESS
+                serial = currentSerial
+            }
+        } else {
+            SerialResponse().handlingError() as SerialResponse
+        }
     }
 
     override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
         return Single.fromCallable { getSessionStateInternal(finishAfterExecute) }
-                .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
     }
 
     private fun getSessionStateInternal(finishAfterExecute: Boolean): SessionStateResponse {
@@ -544,7 +565,7 @@ class Atol(context: Context, val settings: String) : EcrDriver {
 
     override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
         return Single.fromCallable { openShiftInternal(finishAfterExecute) }
-                .subscribeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
     }
 
     private fun openShiftInternal(finishAfterExecute: Boolean): OpenShiftResponse {
@@ -557,11 +578,12 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         }
 
         cancelCheck()
-        val openShiftResponse = if (setMode(IFptr.MODE_REGISTRATION) && driver.OpenSession().isOK()) {
-            OpenShiftResponse().successResult()
-        } else {
-            OpenShiftResponse().handlingError()
-        }
+        val openShiftResponse =
+            if (setMode(IFptr.MODE_REGISTRATION) && driver.OpenSession().isOK()) {
+                OpenShiftResponse().successResult()
+            } else {
+                OpenShiftResponse().handlingError()
+            }
 
         driver.put_DeviceEnabled(false)
 
