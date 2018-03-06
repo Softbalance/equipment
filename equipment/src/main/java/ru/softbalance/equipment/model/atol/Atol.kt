@@ -138,8 +138,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             }
         }
 
-        driver.put_DeviceEnabled(false)
-
         val result = EquipmentResponse().successResult() as EquipmentResponse
 
         if (finishAfterExecute) {
@@ -487,8 +485,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
                 }
             }
 
-        driver.put_DeviceEnabled(false)
-
         if (finishAfterExecute) {
             finish()
         }
@@ -555,8 +551,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             resultInfo = getInfo()
         }
 
-        driver.put_DeviceEnabled(false)
-
         if (finishAfterExecute) {
             finish()
         }
@@ -584,8 +578,6 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             } else {
                 OpenShiftResponse().handlingError()
             }
-
-        driver.put_DeviceEnabled(false)
 
         if (finishAfterExecute) {
             finish()
