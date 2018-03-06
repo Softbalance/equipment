@@ -4,7 +4,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import rx.Subscription
 
-fun String.toHttpUrl(port: Int): String {
+internal fun String.toHttpUrl(port: Int): String {
     var url: String
     if (this.startsWith("http://")) {
         url = this
@@ -19,15 +19,15 @@ fun String.toHttpUrl(port: Int): String {
     return url
 }
 
-fun Subscription?.isActive(): Boolean {
+internal fun Subscription?.isActive(): Boolean {
     return this != null && !this.isUnsubscribed
 }
 
-fun Subscription?.isNonActive(): Boolean {
+internal fun Subscription?.isNonActive(): Boolean {
     return this == null || this.isUnsubscribed
 }
 
-class SingleClickListener(val click: (v: View) -> Unit) : View.OnClickListener {
+internal class SingleClickListener(val click: (v: View) -> Unit) : View.OnClickListener {
 
     companion object {
         private val DOUBLE_CLICK_TIMEOUT = ViewConfiguration.getDoubleTapTimeout()
@@ -50,11 +50,11 @@ class SingleClickListener(val click: (v: View) -> Unit) : View.OnClickListener {
 /**
  * Click listener setter that prevents double click on the view it´s set
  */
-fun View.singleClick(l: (android.view.View?) -> Unit){
+internal fun View.singleClick(l: (android.view.View?) -> Unit){
     setOnClickListener(SingleClickListener(l))
 }
 
-var View.visible: Boolean
+internal var View.visible: Boolean
     get() {
         return this.visibility == View.VISIBLE
     }
