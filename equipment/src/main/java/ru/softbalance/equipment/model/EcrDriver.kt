@@ -12,5 +12,7 @@ interface EcrDriver {
 
     fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse>
 
+    fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse>
+
     fun finish()
 }

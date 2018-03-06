@@ -255,6 +255,12 @@ class Posiflex(
         return Single.error<OpenShiftResponse>(accessException)
     }
 
+    override fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse> {
+        val accessException =
+            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+        return Single.error<OfdStatusResponse>(accessException)
+    }
+
     override fun finish() {
         isInitialized = false
         ignoreException { port.close() }

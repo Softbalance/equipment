@@ -64,6 +64,12 @@ class PrintServer(url: String, port: Int, val settings: String) : EcrDriver {
             .apply { resultInfo = "getSessionState is not implemented for PrintServer" })
     }
 
+    override fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse> {
+        val accessException =
+            IllegalAccessException("The method isn't supported")
+        return Single.error<OfdStatusResponse>(accessException)
+    }
+
     override fun finish() {
         // do nothing since it is not required here
     }

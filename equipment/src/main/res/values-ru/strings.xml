@@ -57,4 +57,8 @@
     <string name="incorrect_cashier_name">Некорректное имя либо должность кассира</string>
     <string name="incorrect_payment_place">Некорректное место платежа</string>
     <string name="hint_offset_lines">Отступ для шапки и подвала</string>
+    <string name="printer_error_template">Ошибка [%1$s]: %2$s</string>
+    <string name="error_getting_error_date">не удалось получить дату первого неотправленного документа</string>
+    <string name="error_ofd_unsent_count">Количество неотправленных документов\n%1$d</string>
+    <string name="error_getting_ofd_unsent_count">не удалось получить количество неотправленных в ОФД документов</string>
 </resources>

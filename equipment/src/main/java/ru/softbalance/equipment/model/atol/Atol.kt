@@ -43,6 +43,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         private const val TAX_FIRST = 1
         private const val TAX_LAST = 6
 
+        private const val REGISTER_NUM_UNSENT_OFD_DOCS_COUNT = 44
+        private const val REGISTER_NUM_FIRST_ERROR_DATE = 45
+
         private const val SERIAL_REGISTER_INDEX = 22
 
         private const val PRINT_STRING_TRAIT = "trait"
@@ -562,6 +565,11 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse> {
+        return Single.fromCallable { getOfdStatusInternal(finishAfterExecute) }
+            .subscribeOn(Schedulers.io())
+    }
+
     private fun openShiftInternal(finishAfterExecute: Boolean): OpenShiftResponse {
         if (driverStatus == DriverStatus.FINISHED) {
             return OpenShiftResponse().initFailure() as OpenShiftResponse
@@ -595,4 +603,61 @@ class Atol(context: Context, val settings: String) : EcrDriver {
             && driver.put_Mode(IFptr.MODE_REPORT_NO_CLEAR).isOK()
             && driver.SetMode().isOK()
             && driver.PrintFooter().isOK())
+
+    private fun getOfdStatusInternal(finishAfterExecute: Boolean): OfdStatusResponse {
+
+        if (driverStatus == DriverStatus.FINISHED) {
+            return OfdStatusResponse(OfdStatus()).initFailure() as OfdStatusResponse
+        }
+
+        if (driver.put_DeviceEnabled(true).isFail()) {
+            return OfdStatusResponse(OfdStatus()).handlingError() as OfdStatusResponse
+        }
+
+        val status = OfdStatus()
+
+        status.errorCode = driver._OFDError
+
+        driver.put_RegisterNumber(REGISTER_NUM_FIRST_ERROR_DATE)
+        if (driver.GetRegister() == RESULT_OK) {
+            status.errorDate = getDateTime().timeInMillis
+        } else {
+            status.isError = true
+            status.errorText = (if (status.errorText.isEmpty()) "" else status.errorText) +
+                    context.getString(
+                        R.string.printer_error_template,
+                        REGISTER_NUM_FIRST_ERROR_DATE.toString(),
+                        context.getString(R.string.error_getting_error_date))
+        }
+
+        if (!status.isError) {
+            driver.put_RegisterNumber(REGISTER_NUM_UNSENT_OFD_DOCS_COUNT)
+            if (driver.GetRegister() == RESULT_OK) {
+                status.unsetDocsCount = driver._Count
+                status.isError = status.unsetDocsCount > 0
+            } else {
+                status.isError = true
+                status.errorText = context.getString(
+                    R.string.printer_error_template,
+                    REGISTER_NUM_UNSENT_OFD_DOCS_COUNT.toString(),
+                    context.getString(R.string.error_getting_ofd_unsent_count))
+            }
+        }
+
+        if (finishAfterExecute) {
+            finish()
+        }
+
+        return OfdStatusResponse(status).successResult() as OfdStatusResponse
+    }
+
+    private fun getDateTime(): Calendar {
+        val cal = Calendar.getInstance()
+        cal.time = driver._Time
+        val time = (cal.get(Calendar.HOUR_OF_DAY) * 3600
+                + cal.get(Calendar.MINUTE) * 60
+                + cal.get(Calendar.SECOND))
+        cal.timeInMillis = driver._Date.time + time * 1000
+        return cal
+    }
 }

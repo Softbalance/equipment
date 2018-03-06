@@ -57,4 +57,8 @@
     <string name="incorrect_cashier_name">Incorrect cashier name or position</string>
     <string name="incorrect_payment_place">Incorrect payment place</string>
     <string name="hint_offset_lines">Offset for header and footer</string>
+    <string name="printer_error_template">Error [%1$s]: %2$s</string>
+    <string name="error_getting_error_date">can\'t get first unsent doc date</string>
+    <string name="error_ofd_unsent_count">Unsent documents\n%1$d</string>
+    <string name="error_getting_ofd_unsent_count">can\'t get OFD unsent docs count</string>
 </resources>

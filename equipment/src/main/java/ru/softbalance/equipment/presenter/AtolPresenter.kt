@@ -58,34 +58,34 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
         view?.showLoading(context.getString(R.string.test_print) ?: "")
 
         val tasks = listOf(
-                Task().apply { data = context.getString(R.string.text_print) },
-                Task().apply { type = TaskType.PRINT_HEADER })
+            Task().apply { data = context.getString(R.string.text_print) },
+            Task().apply { type = TaskType.PRINT_HEADER })
 
         val driver = Atol(context, settings)
 
         printTest = driver.getSerial(finishAfterExecute = false)
-                .flatMap { serialRes ->
-                    serial = serialRes.resultInfo
-                    driver.execute(tasks, finishAfterExecute = false)
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    driver.finish()
-                    view?.hideLoading()
-                }
-                .subscribe({ response ->
-                    printedSuccessful = response.isSuccess()
-                    view?.let {
-                        if (printedSuccessful && settings.isNotEmpty()) {
-                            it.showSettingsState(true)
-                        } else {
-                            it.showError(response.resultInfo)
-                        }
+            .flatMap { serialRes ->
+                serial = serialRes.resultInfo
+                driver.execute(tasks, finishAfterExecute = false)
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                driver.finish()
+                view?.hideLoading()
+            }
+            .subscribe({ response ->
+                printedSuccessful = response.isSuccess()
+                view?.let {
+                    if (printedSuccessful && settings.isNotEmpty()) {
+                        it.showSettingsState(true)
+                    } else {
+                        it.showError(response.resultInfo)
                     }
-                }, {
-                    printedSuccessful = false
-                    view?.showError(it.toString())
-                })
+                }
+            }, {
+                printedSuccessful = false
+                view?.showError(it.toString())
+            })
     }
 
     fun startConnection() {
@@ -109,20 +109,20 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         val driver = Atol(context, settings)
         getFrInfo = driver.getSerial(finishAfterExecute = false)
-                .flatMap { serialRes ->
-                    driver.getSessionState(finishAfterExecute = false)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .doOnSuccess { sessionRes ->
-                                view?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
-                            }
-                }
-                .doOnUnsubscribe {
-                    driver.finish()
-                    view?.hideLoading()
-                }
-                .subscribe({ /* ok */ }, { err ->
-                    view?.showError(err.message ?: "")
-                })
+            .flatMap { serialRes ->
+                driver.getSessionState(finishAfterExecute = false)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnSuccess { sessionRes ->
+                        view?.showConfirm("$serialRes, ${sessionRes.frSessionState}")
+                    }
+            }
+            .doOnUnsubscribe {
+                driver.finish()
+                view?.hideLoading()
+            }
+            .subscribe({ /* ok */ }, { err ->
+                view?.showError(err.message ?: "")
+            })
     }
 
     fun openShift() {
@@ -134,19 +134,19 @@ class AtolPresenter(context: Context, settings: String) : Presenter<AtolFragment
 
         val driver = Atol(context, settings)
         openShift = driver.openShift(finishAfterExecute = true)
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    view?.hideLoading()
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                view?.hideLoading()
+            }
+            .subscribe({ res ->
+                val message = when {
+                    res.shiftAlreadyOpened -> "Shift already opened, it's OK!"
+                    res.shiftExpired24Hours -> "Shift expired please print z-report!"
+                    else -> res.resultInfo
                 }
-                .subscribe({ res ->
-                    val message = when {
-                        res.shiftAlreadyOpened -> "Shift already opened, it's OK!"
-                        res.shiftExpired24Hours -> "Shift expired please print z-report!"
-                        else -> res.resultInfo
-                    }
-                    view?.showConfirm(message)
-                }, { err ->
-                    view?.showError(err.message ?: "")
-                })
+                view?.showConfirm(message)
+            }, { err ->
+                view?.showError(err.message ?: "")
+            })
     }
 }
