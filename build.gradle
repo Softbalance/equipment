@@ -1,7 +1,7 @@
 apply from: "/scripts/gitUtil.gradle"
 
 buildscript {
-    ext.kotlinVersion = '1.2.21'
+    ext.kotlinVersion = '1.2.31'
     ext.androidPluginVersion = '3.0.1'
     repositories {
         google()
@@ -27,7 +27,7 @@ task clean(type: Delete) {
 
 ext {
     appVersionCode = gitCommitCount()
-    appVersionName = "1.7.8"
+    appVersionName = "1.8.0"
     appId = "ru.softbalance.equipmentlibrary"
 
     SDKVersion = 27
@@ -49,7 +49,7 @@ ext {
 
     flexBoxLayoutVersion = "0.3.0"
 
-    atolPrinterVersion = "9.11.2.6032"
+    atolPrinterVersion = "9.12.1.6236"
 
     kotlinMockitoVersion = "1.5.0"
     mockitoAndroidVersion = "2.8.47"
