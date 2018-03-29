@@ -1,4 +1,4 @@
-package com.hoho.android.usbserial;
+package ru.softbalance.android.usbserial;
 
 /**
  * Static container of information about this library.

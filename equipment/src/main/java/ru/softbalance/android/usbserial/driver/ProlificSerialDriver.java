@@ -25,7 +25,7 @@
  * See https://github.com/eblot/pyftdi
  */
 
-package com.hoho.android.usbserial.driver;
+package ru.softbalance.android.usbserial.driver;
 
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;

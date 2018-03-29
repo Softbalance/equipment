@@ -3,10 +3,10 @@ package ru.softbalance.equipment.model.posiflex.ports
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
-import com.hoho.android.usbserial.driver.ProbeTable
-import com.hoho.android.usbserial.driver.UsbSerialPort
-import com.hoho.android.usbserial.driver.UsbSerialProber
+import ru.softbalance.android.usbserial.driver.CdcAcmSerialDriver
+import ru.softbalance.android.usbserial.driver.ProbeTable
+import ru.softbalance.android.usbserial.driver.UsbSerialPort
+import ru.softbalance.android.usbserial.driver.UsbSerialProber
 import java.io.IOException
 import java.util.*
 
