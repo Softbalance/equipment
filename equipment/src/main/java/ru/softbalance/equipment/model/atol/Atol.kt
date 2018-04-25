@@ -259,12 +259,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun cancelCheck(): Boolean {
-        return if (setMode(IFptr.MODE_REGISTRATION)) {
-            driver.CancelCheck()
-            true
-        } else {
-            false
-        }
+        setMode(IFptr.MODE_REGISTRATION)
+        driver.CancelCheck()
+        return true
     }
 
     private fun setClientContact(clientContact: String): Boolean =
@@ -295,9 +292,9 @@ class Atol(context: Context, val settings: String) : EcrDriver {
     }
 
     private fun openCheckSell(task: Task): Boolean {
-        val result =
-            prepareRegistration() && openCheck(IFptr.CHEQUE_TYPE_SELL) && initCheckParams(task)
-        if (!result) closeCheck()
+        prepareRegistration()
+        val result = openCheck(IFptr.CHEQUE_TYPE_SELL) && initCheckParams(task)
+        if (!result) cancelCheck()
         return result
     }
 
@@ -323,16 +320,12 @@ class Atol(context: Context, val settings: String) : EcrDriver {
                 return false
             }
         }
-        /*
-        FIXME for unknown reasons this operation leads to error «Смена открыта - операция невозможна»
-        driver developers [mailto:a.belikov@atol.ru] didn't say anything useful
-
-        task.param.paymentPlace?.let {
-            if (!setStringFiscalProperty(1187, it)){
+        task.param.paymentPlace.takeIf { !it.isNullOrBlank() }?.let {
+            if (!setStringFiscalProperty(1187, it)) {
                 lastInfo = context.getString(R.string.incorrect_payment_place)
                 return false
             }
-        }*/
+        }
         return true
     }
 
