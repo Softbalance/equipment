@@ -30,9 +30,10 @@ kapt {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':android_util_fr_drv_ng')
 
     // Kotlin language
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     // Android support
     implementation "com.android.support:appcompat-v7:$supportLibVersion"
