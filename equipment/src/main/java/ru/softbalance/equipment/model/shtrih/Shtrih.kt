@@ -3,7 +3,7 @@ package ru.softbalance.equipment.model.shtrih
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import io.Libcore
+import libcore.io.Libcore
 import ru.shtrih_m.fr_drv_ng.classic_interface.Classic
 import ru.shtrih_m.fr_drv_ng.classic_interface.ClassicImpl
 import ru.softbalance.equipment.LINE_SEPARATOR
@@ -214,14 +214,6 @@ class Shtrih(
 
     override fun finish() {
         classic.Disconnect()
-    }
-
-    private fun ignoreException(function: () -> Unit) {
-        try {
-            function.invoke()
-        } catch (e: Exception) {
-            // ignore
-        }
     }
 
     protected fun applyAlignment(text: String,
