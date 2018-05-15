@@ -1,8 +1,8 @@
 apply from: "/scripts/gitUtil.gradle"
 
 buildscript {
-    ext.kotlinVersion = '1.2.31'
-    ext.androidPluginVersion = '3.0.1'
+    ext.kotlinVersion = '1.2.41'
+    ext.androidPluginVersion = '3.1.2'
     repositories {
         google()
         jcenter()
@@ -32,7 +32,7 @@ ext {
 
     SDKVersion = 27
     minSDKVersion = 16
-    buildToolsVersion = "27.0.2"
+    buildToolsVersion = "27.0.3"
 
     supportLibVersion = "27.1.1"
     multidexVersion = "1.0.2"

@@ -62,10 +62,10 @@ kapt {
 }
 
 dependencies {
-    compile project(':equipment')
+    implementation project(':equipment')
 
     // Kotlin language
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     // Android support
     implementation "com.android.support:appcompat-v7:$supportLibVersion"

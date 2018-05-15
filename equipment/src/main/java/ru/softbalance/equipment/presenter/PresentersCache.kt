@@ -8,7 +8,7 @@ object PresentersCache {
     fun get(presenterName: String): Presenter<*>? = presenters[presenterName]
 
     fun <T : Presenter<*>> add(presenterName: String, presenter: T): T {
-        presenters.put(presenterName, presenter)
+        presenters[presenterName] = presenter
         return presenter
     }
 

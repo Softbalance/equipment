@@ -61,4 +61,5 @@
     <string name="error_getting_error_date">can\'t get first unsent doc date</string>
     <string name="error_ofd_unsent_count">Unsent documents\n%1$d</string>
     <string name="error_getting_ofd_unsent_count">can\'t get OFD unsent docs count</string>
+    <string name="equipment_lib_title_shtrih">Shtrih-compatible device</string>
 </resources>

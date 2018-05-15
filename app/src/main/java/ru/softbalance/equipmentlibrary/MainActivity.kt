@@ -10,6 +10,7 @@ import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_ATOL
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_POSIFLEX
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_SERVER
+import ru.softbalance.equipment.view.DriverSetupActivity.Companion.DRIVER_TYPE_SHTRIH
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.PORT_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SERIAL_ARG
 import ru.softbalance.equipment.view.DriverSetupActivity.Companion.SETTINGS_ARG
@@ -28,21 +29,27 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.buttonAtol).setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
-                    .putExtra(DRIVER_ARG, DRIVER_TYPE_ATOL), DRIVER_REQUEST)
+                .putExtra(DRIVER_ARG, DRIVER_TYPE_ATOL), DRIVER_REQUEST)
         }
 
         findViewById<View>(R.id.buttonPrinter).setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
-                    .putExtra(DRIVER_ARG, DRIVER_TYPE_SERVER)
-                    .putExtra(URL_ARG, "178.170.230.140")
-                    .putExtra(PORT_ARG, 9004),
-                    DRIVER_REQUEST)
+                .putExtra(DRIVER_ARG, DRIVER_TYPE_SERVER)
+                .putExtra(URL_ARG, "178.170.230.140")
+                .putExtra(PORT_ARG, 9004),
+                DRIVER_REQUEST)
         }
 
         findViewById<View>(R.id.buttonPosiflex).setOnClickListener {
             startActivityForResult(Intent(this, DriverSetupActivity::class.java)
-                    .putExtra(DRIVER_ARG, DRIVER_TYPE_POSIFLEX),
-                    DRIVER_REQUEST)
+                .putExtra(DRIVER_ARG, DRIVER_TYPE_POSIFLEX),
+                DRIVER_REQUEST)
+        }
+
+        findViewById<View>(R.id.buttonShtrih).setOnClickListener {
+            startActivityForResult(Intent(this, DriverSetupActivity::class.java)
+                .putExtra(DRIVER_ARG, DRIVER_TYPE_SHTRIH),
+                DRIVER_REQUEST)
         }
     }
 
@@ -55,8 +62,8 @@ class MainActivity : AppCompatActivity() {
             val serial = if (data?.getStringExtra(SERIAL_ARG).isNullOrEmpty())
                 "no serial data found" else data?.getStringExtra(SERIAL_ARG)
 
-            Toast.makeText(this, "settings: " + settings, Toast.LENGTH_LONG).show()
-            Toast.makeText(this, "serial: " + serial, Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "settings: $settings", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "serial: $serial", Toast.LENGTH_LONG).show()
         }
     }
 }

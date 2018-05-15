@@ -6,15 +6,13 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import ru.softbalance.equipment.R
-import ru.softbalance.equipment.view.fragment.AtolFragment
-import ru.softbalance.equipment.view.fragment.BaseFragment
-import ru.softbalance.equipment.view.fragment.PosiflexFragment
-import ru.softbalance.equipment.view.fragment.PrintServerFragment
+import ru.softbalance.equipment.view.fragment.*
 
 class DriverSetupActivity : AppCompatActivity(),
-        AtolFragment.Callback,
-        PrintServerFragment.Callback,
-        PosiflexFragment.Callback {
+    AtolFragment.Callback,
+    PrintServerFragment.Callback,
+    PosiflexFragment.Callback,
+    ShtrihFragment.Callback {
 
     companion object {
         const val DRIVER_ARG = "DRIVER_ARG"
@@ -25,6 +23,7 @@ class DriverSetupActivity : AppCompatActivity(),
         const val DRIVER_TYPE_ATOL = 1
         const val DRIVER_TYPE_SERVER = 2
         const val DRIVER_TYPE_POSIFLEX = 3
+        const val DRIVER_TYPE_SHTRIH = 4
 
         const val SETTINGS_ARG = "SETTINGS_ARG"
         const val SERIAL_ARG = "SERIAL_ARG"
@@ -54,12 +53,13 @@ class DriverSetupActivity : AppCompatActivity(),
                 DRIVER_TYPE_ATOL -> AtolFragment.newInstance(settings)
                 DRIVER_TYPE_SERVER -> PrintServerFragment.newInstance(url, port, type, settings)
                 DRIVER_TYPE_POSIFLEX -> PosiflexFragment.newInstance(settings)
+                DRIVER_TYPE_SHTRIH -> ShtrihFragment.newInstance(settings)
                 else -> AtolFragment.newInstance()
             }
 
             supportFragmentManager.beginTransaction()
-                    .add(R.id.fragmentContainer, fr, fr.javaClass.simpleName)
-                    .commit()
+                .add(R.id.fragmentContainer, fr, fr.javaClass.simpleName)
+                .commit()
         }
     }
 

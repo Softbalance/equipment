@@ -37,15 +37,6 @@ fun String.toIntOrNull(): Int? = try {
     null
 }
 
-inline fun <T> T.takeIf(predicate: (T) -> Boolean): T? {
-    return if (predicate(this)) this else null
-}
-
-inline fun <T> T.also(block: (T) -> Unit): T {
-    block(this)
-    return this
-}
-
 class PosiflexFragment : BaseFragment() {
 
     interface Callback {
@@ -71,7 +62,8 @@ class PosiflexFragment : BaseFragment() {
 
         val pr = PresentersCache.get(PRESENTER_NAME)
         presenter = if (pr != null) pr as PosiflexPresenter else
-            PresentersCache.add(PRESENTER_NAME, PosiflexPresenter(activity!!, arguments?.getString(DriverSetupActivity.SETTINGS_ARG) ?: ""))
+            PresentersCache.add(PRESENTER_NAME, PosiflexPresenter(activity!!, arguments?.getString(DriverSetupActivity.SETTINGS_ARG)
+                    ?: ""))
     }
 
     override val title: String
@@ -107,22 +99,22 @@ class PosiflexFragment : BaseFragment() {
         offsetInput = view.findViewById(R.id.offsetInput)
 
         RxTextView.textChanges(hostInput).skip(1)
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { presenter.onHostInput(it.toString()) }
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { presenter.onHostInput(it.toString()) }
 
         RxTextView.textChanges(portInput).skip(1)
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { presenter.onPortInput(it.toString().toIntOrNull() ?: 0) }
-                .also { autoDisposable.add(it) }
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { presenter.onPortInput(it.toString().toIntOrNull() ?: 0) }
+            .also { autoDisposable.add(it) }
 
 
         RxTextView.textChanges(codePageInput).skip(1)
-                .debounce(300, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { presenter.onCodePageInput(it.toString().toIntOrNull() ?: 0) }
-                .also { autoDisposable.add(it) }
+            .debounce(300, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { presenter.onCodePageInput(it.toString().toIntOrNull() ?: 0) }
+            .also { autoDisposable.add(it) }
 
         RxTextView.textChanges(offsetInput).skip(1)
             .debounce(300, TimeUnit.MILLISECONDS)
@@ -131,16 +123,16 @@ class PosiflexFragment : BaseFragment() {
             .also { autoDisposable.add(it) }
 
         RxBottomNavigationView.itemSelections(connectionTypeNavigationView).skip(1)
-                .map {
-                    if (it == usbTypeMenuItem) {
-                        DeviceConnectionType.USB
-                    } else {
-                        DeviceConnectionType.NETWORK
-                    }
+            .map {
+                if (it == usbTypeMenuItem) {
+                    DeviceConnectionType.USB
+                } else {
+                    DeviceConnectionType.NETWORK
                 }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { presenter.onChangeConnectionType(it) }
-                .also { autoDisposable.add(it) }
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { presenter.onChangeConnectionType(it) }
+            .also { autoDisposable.add(it) }
 
         testPrintButton.singleClick { presenter.onTestPrint() }
         selectUsbDeviceButton.singleClick { selectUsbDevice(it!!) }
@@ -156,16 +148,16 @@ class PosiflexFragment : BaseFragment() {
 
     private fun showCodePageInfoDialog() {
         AlertDialog.Builder(activity!!)
-                .setTitle(R.string.title_printer_code_page)
-                .setMessage(getString(R.string.info_printer_code_page, getString(R.string.app_name)))
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
+            .setTitle(R.string.title_printer_code_page)
+            .setMessage(getString(R.string.info_printer_code_page, getString(R.string.app_name)))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun selectUsbDevice(view: View) {
         val usbManager = context?.getSystemService(Context.USB_SERVICE) as UsbManager
         val usbDevices = usbManager.deviceList.values
-                .filter { it.vendorId in Posiflex.VENDORS }
+            .filter { it.vendorId in Posiflex.VENDORS }
 
         val popup = ViewUtils.createPopupMenu(activity, view, 0, false)
         val menu = popup.menu
@@ -213,15 +205,16 @@ class PosiflexFragment : BaseFragment() {
     }
 
     fun showUsbDeviceName(deviceName: String) {
-        usbDeviceName.text = deviceName.takeIf { it.isNotEmpty() } ?: getString(R.string.equipment_device_not_selected)
+        usbDeviceName.text = deviceName.takeIf { it.isNotEmpty() } ?:
+                getString(R.string.equipment_device_not_selected)
     }
 
     fun showAcceptationButton(isOK: Boolean, settings: String) {
         testPrintButton.setCompoundDrawablesWithIntrinsicBounds(
-                if (isOK) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
-                null,
-                null,
-                null)
+            if (isOK) ContextCompat.getDrawable(activity!!, R.drawable.ic_confirm_selector) else null,
+            null,
+            null,
+            null)
 
         if (isOK) {
             (hostParent as Callback).onSettingsSelected(settings)
