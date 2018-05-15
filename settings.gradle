@@ -1,1 +1,1 @@
-include ':app', ':equipment', ':android_util_fr_drv_ng'
+include ':app', ':equipment'

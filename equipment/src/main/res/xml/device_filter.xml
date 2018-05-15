@@ -29,4 +29,12 @@
     <usb-device
         product-id="33054"
         vendor-id="4070" />
+
+    <!-- SHTRIH -->
+    <usb-device
+        class="239"
+        product-id="0x0083"
+        protocol="1"
+        subclass="2"
+        vendor-id="0x1fc9" />
 </resources>
