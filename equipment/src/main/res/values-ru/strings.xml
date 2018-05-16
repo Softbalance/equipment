@@ -62,4 +62,5 @@
     <string name="error_ofd_unsent_count">Количество неотправленных документов\n%1$d</string>
     <string name="error_getting_ofd_unsent_count">не удалось получить количество неотправленных в ОФД документов</string>
     <string name="equipment_lib_title_shtrih">Штрих-совместимое устройство</string>
+    <string name="equipment_lib_session_expired">Кассовая смена истекла. Пожалуйста, закройте смену.</string>
 </resources>

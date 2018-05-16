@@ -155,12 +155,11 @@ class Posiflex(
     }
 
     private fun printOffset() {
-        (1..settings.offsetHeaderBottom)
-            .forEach {
-                val offsetTask = Task()
-                offsetTask.data = " "
-                printStringInternal(offsetTask)
-            }
+        (1..settings.offsetHeaderBottom).forEach {
+            val offsetTask = Task()
+            offsetTask.data = " "
+            printStringInternal(offsetTask)
+        }
     }
 
     private fun printString(task: Task) {
