@@ -289,4 +289,7 @@ class Posiflex(
             else -> 0x00
         }
     }
+
+    override fun getTaxes(finishAfterExecute: Boolean): Single<List<Tax>> =
+        Single.fromCallable { emptyList<Tax>() }.subscribeOn(Schedulers.io())
 }

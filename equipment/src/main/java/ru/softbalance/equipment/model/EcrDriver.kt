@@ -15,4 +15,6 @@ interface EcrDriver {
     fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse>
 
     fun finish()
+
+    fun getTaxes(finishAfterExecute: Boolean): Single<List<Tax>>
 }

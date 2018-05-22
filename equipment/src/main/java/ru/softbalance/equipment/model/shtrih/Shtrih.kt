@@ -269,27 +269,20 @@ class Shtrih(
     }
 
     @SuppressLint("SwitchIntDef")
-    protected fun wrapText(command: Task, lineLength: Int): Array<String> {
-        val result: String
-
-        when (command.param.wrap) {
-            true -> result = wrap(command.data, lineLength, null, false)
-            else -> result = command.data
-        }
-
-        return result
-            .split(LINE_SEPARATOR.toRegex())
-            .dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-    }
+    protected fun wrapText(command: Task, lineLength: Int) = when (command.param.wrap) {
+        true -> wrap(command.data, lineLength, null, false)
+        else -> command.data
+    }.split(LINE_SEPARATOR.toRegex())
+        .dropLastWhile { it.isEmpty() }
+        .toTypedArray()
 
     private fun buildMessageByException(e: Throwable): String = when (e) {
         is UnknownHostException,
         is ConnectException,
-        is NoRouteToHostException -> context.getString(R.string.equipment_error_host_connection_failure)
+        is NoRouteToHostException -> R.string.equipment_error_host_connection_failure.toStrRes()
 
         is SocketTimeoutException,
-        is TimeoutException -> context.getString(R.string.equipment_error_time_out)
+        is TimeoutException -> R.string.equipment_error_time_out.toStrRes()
 
         is IOException -> context.getString(R.string.equipment_error_io_exception, e.toString())
 
@@ -298,25 +291,24 @@ class Shtrih(
         else -> e.cause?.let { buildMessageByException(it) } ?: e.message ?: e.toString()
     }
 
-    override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> {
-        return Single.just(SerialResponse())
-    }
+    override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> =
+        Single.just(SerialResponse())
 
     override fun getSessionState(finishAfterExecute: Boolean): Single<SessionStateResponse> {
         val accessException =
-            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+            IllegalAccessException(R.string.equipment_error_method_not_supported.toStrRes())
         return Single.error<SessionStateResponse>(accessException)
     }
 
     override fun openShift(finishAfterExecute: Boolean): Single<OpenShiftResponse> {
         val accessException =
-            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+            IllegalAccessException(R.string.equipment_error_method_not_supported.toStrRes())
         return Single.error<OpenShiftResponse>(accessException)
     }
 
     override fun getOfdStatus(finishAfterExecute: Boolean): Single<OfdStatusResponse> {
         val accessException =
-            IllegalAccessException(context.getString(R.string.equipment_error_method_not_supported))
+            IllegalAccessException(R.string.equipment_error_method_not_supported.toStrRes())
         return Single.error<OfdStatusResponse>(accessException)
     }
 
@@ -351,7 +343,7 @@ class Shtrih(
 
     private fun checkSessionOrThrow() {
         if (!isSessionActive())
-            throw RuntimeException(context.getString(R.string.equipment_lib_session_expired))
+            throw RuntimeException(R.string.equipment_lib_session_expired.toStrRes())
     }
 
     private fun reportZ() = classic.PrintReportWithCleaning().checkOrThrow()
@@ -359,5 +351,25 @@ class Shtrih(
     private fun reportX() = classic.PrintReportWithoutCleaning().checkOrThrow()
 
     private fun BigDecimal.toShtrihLong() = this.multiply(ONE_HUNDRED).toLong()
+
+    override fun getTaxes(finishAfterExecute: Boolean): Single<List<Tax>> = Single.fromCallable {
+        val taxes = getTaxesInternal()
+        if (finishAfterExecute) {
+            finish()
+        }
+        taxes
+    }.subscribeOn(Schedulers.io())
+
+    private fun getTaxesInternal() = listOf(
+        Tax(0, R.string.tax_no_vat.toStrRes()),
+        Tax(1, R.string.tax_vat_18.toStrRes()),
+        Tax(2, R.string.tax_vat_10.toStrRes()),
+        Tax(3, R.string.tax_vat_0.toStrRes()),
+        Tax(4, R.string.tax_no_vat.toStrRes()),
+        Tax(5, R.string.tax_vat_18_118.toStrRes()),
+        Tax(6, R.string.tax_vat_10_110.toStrRes())
+    )
+
+    private fun Int.toStrRes() = context.getString(this)
 
 }

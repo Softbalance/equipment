@@ -453,40 +453,24 @@ class Atol(context: Context, val settings: String) : EcrDriver {
         return driver._DeviceSettings
     }
 
-    fun getTaxes(finishAfterExecute: Boolean): Observable<List<Tax>> {
-        return Observable.fromCallable { getTaxesInternal(finishAfterExecute) }
-            .subscribeOn(Schedulers.io())
-    }
-
-    private fun getTaxesInternal(finishAfterExecute: Boolean): List<Tax> {
-        if (driverStatus == DriverStatus.FINISHED) {
-            throw RuntimeException(context.getString(R.string.equipment_init_failure))
-        }
-
-        if (driver.put_DeviceEnabled(true).isFail()) {
-            throw RuntimeException(getInfo())
-        }
-
-        if (!setMode(IFptr.MODE_PROGRAMMING)) {
-            throw RuntimeException(getInfo())
-        }
-
-        val taxes = (TAX_FIRST..TAX_LAST)
-            .map { index ->
-                Tax().apply {
-                    id = index.toLong()
-                    driver.put_CaptionPurpose(index + TAX_INDEX)
-                    driver.GetCaption()
-                    title = driver._Caption
-                }
-            }
-
+    override fun getTaxes(finishAfterExecute: Boolean): Single<List<Tax>> = Single.fromCallable {
+        val taxes = getTaxesInternal()
         if (finishAfterExecute) {
             finish()
         }
+        taxes
+    }.subscribeOn(Schedulers.io())
 
-        return taxes
-    }
+    private fun getTaxesInternal() = listOf(
+        Tax(1L, R.string.tax_vat_0.toStrRes()),
+        Tax(2L, R.string.tax_vat_10.toStrRes()),
+        Tax(3L, R.string.tax_vat_18.toStrRes()),
+        Tax(4L, R.string.tax_no_vat.toStrRes()),
+        Tax(5L, R.string.tax_vat_10_110.toStrRes()),
+        Tax(6L, R.string.tax_vat_18_118.toStrRes())
+    )
+
+    private fun Int.toStrRes() = context.getString(this)
 
     override fun getSerial(finishAfterExecute: Boolean): Single<SerialResponse> {
         return Single.fromCallable { getSerialInternal(finishAfterExecute) }
