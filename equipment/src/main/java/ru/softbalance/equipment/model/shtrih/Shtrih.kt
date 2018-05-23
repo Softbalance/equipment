@@ -38,7 +38,8 @@ class Shtrih(
         const val CHECK_TYPE_ADD = 1
         const val CHECK_TYPE_RETURN = 2
 
-        private const val CONNECTION_TIME_OUT_MILLIS = 5000L
+        private const val CONNECTION_TIMEOUT_MILLIS = 5000L
+        private const val OPEN_SHIFT_SLEEP_TIMEOUT_MILLIS = 1500L
         private const val DEFAULT_LINE_LENGTH = 31
 
         private const val PRINT_STRING_TRAIT = "trait"
@@ -76,7 +77,7 @@ class Shtrih(
     override fun execute(tasks: List<Task>, finishAfterExecute: Boolean): Single<EquipmentResponse> {
         return prepare()
             .subscribeOn(Schedulers.io())
-            .timeout(CONNECTION_TIME_OUT_MILLIS, TimeUnit.MILLISECONDS)
+            .timeout(CONNECTION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
             .andThen(executeTasks(tasks))
             .doOnUnsubscribe { if (finishAfterExecute) finish() }
             .toSingle {
@@ -99,13 +100,15 @@ class Shtrih(
                 executeTask(task)
             } catch (e: Exception) {
                 throw ExecuteException(
-                    "Failed to execute task ${task.type}. ${buildMessageByException(e)}")
+                    "Failed to execute task ${task.type}. ${buildMessageByException(e)}"
+                )
             }
         }
     }
 
     private fun prepare() = Completable.fromCallable {
-        val url = "tcp://${settings.host}:${settings.port}?timeout=$CONNECTION_TIME_OUT_MILLIS&protocol=v1"
+        val url =
+            "tcp://${settings.host}:${settings.port}?timeout=$CONNECTION_TIMEOUT_MILLIS&protocol=v1"
         classic.Set_ConnectionURI(url)
         classic.Connect().checkOrThrow()
         classic.Set_Password(30)
@@ -115,13 +118,12 @@ class Shtrih(
         val lineLength = getLineLength()
         when (task.type.toLowerCase()) {
             TaskType.STRING -> printString(task, lineLength)
-            TaskType.REGISTRATION -> registration(task)
+            TaskType.REGISTRATION, TaskType.RETURN -> registration(task)
             TaskType.CLOSE_CHECK -> closeCheck()
             TaskType.CANCEL_CHECK -> cancelCheck()
             TaskType.OPEN_CHECK_SELL -> openCheckSell(task)
             TaskType.PAYMENT -> setSum(task)
             TaskType.OPEN_CHECK_RETURN -> openCheckReturn(task)
-            TaskType.RETURN -> setSum(task)
             TaskType.CASH_INCOME -> cashOperation(task, { classic.CashIncome() })
             TaskType.CASH_OUTCOME -> cashOperation(task, { classic.CashOutcome() })
             TaskType.CLIENT_CONTACT -> setClientContact(task)
@@ -131,7 +133,8 @@ class Shtrih(
             else -> {
                 Log.e(
                     Atol::class.java.simpleName,
-                    context.getString(R.string.equipment_lib_operation_not_supported, task.type))
+                    context.getString(R.string.equipment_lib_operation_not_supported, task.type)
+                )
             }
         }
     }
@@ -171,8 +174,14 @@ class Shtrih(
 
     private fun openCheckReturn(task: Task) {
         checkSessionOrThrow()
-        classic.OpenSession()
-        classic.Set_CheckType(CHECK_TYPE_RETURN)
+        openCheck(CHECK_TYPE_RETURN, task)
+    }
+
+    private fun openCheck(type: Int, task: Task) {
+        if (classic.OpenSession().check()) {
+            Thread.sleep(OPEN_SHIFT_SLEEP_TIMEOUT_MILLIS)
+        }
+        classic.Set_CheckType(type)
         classic.OpenCheck().checkOrThrow()
         initCheckParams(task)
     }
@@ -198,10 +207,7 @@ class Shtrih(
 
     private fun openCheckSell(task: Task) {
         checkSessionOrThrow()
-        classic.OpenSession()
-        classic.Set_CheckType(CHECK_TYPE_SELL)
-        classic.OpenCheck().checkOrThrow()
-        initCheckParams(task)
+        openCheck(CHECK_TYPE_SELL, task)
     }
 
     private fun initCheckParams(task: Task) {
@@ -316,9 +322,10 @@ class Shtrih(
         classic.Disconnect()
     }
 
-    protected fun applyAlignment(text: String,
-                                 @Alignment alignment: String?,
-                                 lineLength: Int): String {
+    protected fun applyAlignment(
+        text: String,
+        @Alignment alignment: String?,
+        lineLength: Int): String {
         val textLength = text.length
 
         if (textLength > lineLength) return text
