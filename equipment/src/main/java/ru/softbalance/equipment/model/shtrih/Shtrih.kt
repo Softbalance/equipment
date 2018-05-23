@@ -32,11 +32,13 @@ class Shtrih(
     private val classic: Classic) : EcrDriver {
 
     companion object {
-        const val ECR_MODE_SESSION_EXPIRED = 3
+        private const val ECR_MODE_SESSION_EXPIRED = 3
 
-        const val CHECK_TYPE_SELL = 0
-        const val CHECK_TYPE_ADD = 1
-        const val CHECK_TYPE_RETURN = 2
+        private const val CHECK_TYPE_SELL = 0
+        private const val CHECK_TYPE_ADD = 1
+        private const val CHECK_TYPE_RETURN = 2
+
+        private const val FN_TAG_TYPE_STRING = 7
 
         private const val CONNECTION_TIMEOUT_MILLIS = 5000L
         private const val OPEN_SHIFT_SLEEP_TIMEOUT_MILLIS = 1500L
@@ -212,6 +214,22 @@ class Shtrih(
 
     private fun initCheckParams(task: Task) {
         setClientContact(task)
+
+        val cashierNameAndPosition = (task.param.cashierName?.trim() ?: "") +
+                " " + (task.param.cashierPosition?.trim() ?: "")
+        if (cashierNameAndPosition.isNotBlank()) {
+            classic.Set_TagNumber(1021)
+            classic.Set_TagType(FN_TAG_TYPE_STRING)
+            classic.Set_TagValueStr(cashierNameAndPosition)
+            classic.FNSendTag()
+        }
+
+        task.param.cashierINN?.let {
+            classic.Set_TagNumber(1203)
+            classic.Set_TagType(FN_TAG_TYPE_STRING)
+            classic.Set_TagValueStr(it)
+            classic.FNSendTag()
+        }
     }
 
     private fun setClientContact(task: Task) {
