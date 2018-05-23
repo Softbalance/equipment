@@ -62,4 +62,13 @@
     <string name="error_ofd_unsent_count">Unsent documents\n%1$d</string>
     <string name="error_getting_ofd_unsent_count">can\'t get OFD unsent docs count</string>
     <string name="equipment_lib_title_shtrih">Shtrih-compatible device</string>
+    <string name="equipment_lib_session_expired">ECR session is expired. Please, close session.</string>
+    <string name="tax_no_vat">Without VAT</string>
+    <string name="tax_vat_10">VAT 10%</string>
+    <string name="tax_vat_18">VAT 18%</string>
+    <string name="tax_vat_0">VAT 0%</string>
+    <string name="tax_vat_18_118">VAT 18/118</string>
+    <string name="tax_vat_10_110">VAT 10/110</string>
+    <string name="equipment_lib_error_taxes_empty">There are no tax rates</string>
+    <string name="equipment_lib_obtaining_taxes_failed">Obtaining taxes failed: %1$s</string>
 </resources>

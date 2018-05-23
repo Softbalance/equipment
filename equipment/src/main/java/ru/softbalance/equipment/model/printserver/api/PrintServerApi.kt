@@ -10,36 +10,36 @@ import ru.softbalance.equipment.model.printserver.api.model.SettingsValues
 import ru.softbalance.equipment.model.printserver.api.model.TasksRequest
 import ru.softbalance.equipment.model.printserver.api.response.*
 import ru.softbalance.equipment.model.printserver.api.response.settings.SettingsResponse
-import rx.Observable
+import rx.Single
 
 interface PrintServerApi {
 
     @POST("/hi")
-    fun hi(): Observable<MessageResponse>
+    fun hi(): Single<MessageResponse>
 
     @POST("/version")
-    fun version(): Observable<VersionResponse>
+    fun version(): Single<VersionResponse>
 
     @POST("/supportDeviceType")
-    fun getDeviceTypes(): Observable<DevicesResponse>
+    fun getDeviceTypes(): Single<DevicesResponse>
 
     @FormUrlEncoded
     @POST("/supportModels")
-    fun getModels(@Field("typeId") deviceType: Int): Observable<ModelsResponse>
+    fun getModels(@Field("typeId") deviceType: Int): Single<ModelsResponse>
 
     @FormUrlEncoded
     @POST("/deviceSetting")
-    fun getDeviceSettings(@Field("driverId") driverId: String): Observable<SettingsResponse>
+    fun getDeviceSettings(@Field("driverId") driverId: String): Single<SettingsResponse>
 
     @POST("/deviceSetting")
-    fun extractDeviceSettings(@Body compressedSettings: RequestBody): Observable<SettingsResponse>
+    fun extractDeviceSettings(@Body compressedSettings: RequestBody): Single<SettingsResponse>
 
     @POST("/deviceSettingZip")
-    fun compressSettings(@Body settingsValues: SettingsValues): Observable<CompressedSettingsResponse>
+    fun compressSettings(@Body settingsValues: SettingsValues): Single<CompressedSettingsResponse>
 
     @POST("/taxes")
-    fun getTaxes(@Body compressedSettings: RequestBody): Observable<TaxesResponse>
+    fun getTaxes(@Body compressedSettings: RequestBody): Single<TaxesResponse>
 
     @POST("/execute")
-    fun execute(@Body tasksRequest: TasksRequest): Observable<EquipmentResponse>
+    fun execute(@Body tasksRequest: TasksRequest): Single<EquipmentResponse>
 }

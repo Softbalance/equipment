@@ -28,7 +28,8 @@ import rx.schedulers.Schedulers
 class PrintServerPresenter(context: Context,
                            var url: String,
                            var port: Int,
-                           var zipSettings: String? = null) : Presenter<PrintServerFragment>(context) {
+                           var zipSettings: String? = null) :
+    Presenter<PrintServerFragment>(context) {
 
     private val exceptionHandler = ExceptionHandler(context)
 
@@ -60,24 +61,24 @@ class PrintServerPresenter(context: Context,
     val api: PrintServerApi
         get() {
             return Retrofit.Builder()
-                    .baseUrl(url.toHttpUrl(port))
-                    .client(OkHttpClient.Builder()
-                            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                            .build())
-                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                    .addConverterFactory(JacksonConverterFactory.create(JacksonConfigurator.build()))
-                    .build()
-                    .create(PrintServerApi::class.java)
+                .baseUrl(url.toHttpUrl(port))
+                .client(OkHttpClient.Builder()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .build())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create(JacksonConfigurator.build()))
+                .build()
+                .create(PrintServerApi::class.java)
         }
 
     override fun bindView(view: PrintServerFragment) {
         super.bindView(view)
 
         if (restoreSettingsRequest.isActive()
-                || deviceRequest.isActive()
-                || modelRequest.isActive()
-                || settingsRequest.isActive()
-                || zipSettingsRequest.isActive()) {
+            || deviceRequest.isActive()
+            || modelRequest.isActive()
+            || settingsRequest.isActive()
+            || zipSettingsRequest.isActive()) {
             view.showLoading(context.getString(R.string.connect_in_progress))
         } else if (printRequest.isActive()) {
             view.showLoading(context.getString(R.string.test_print))
@@ -133,22 +134,22 @@ class PrintServerPresenter(context: Context,
         showProgress()
 
         deviceRequest = api.getDeviceTypes()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    view?.let {
-                        it.hideLoading()
-                        it.showConnectionState(connectedSuccessful)
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                view?.let {
+                    it.hideLoading()
+                    it.showConnectionState(connectedSuccessful)
                 }
-                .subscribe({
-                    connectedSuccessful = it.isSuccess()
-                    deviceTypes = it.deviceTypes
-                    showResultInfo(it)
-                }, {
-                    connectedSuccessful = false
-                    handleError(it)
-                })
+            }
+            .subscribe({
+                connectedSuccessful = it.isSuccess()
+                deviceTypes = it.deviceTypes
+                showResultInfo(it)
+            }, {
+                connectedSuccessful = false
+                handleError(it)
+            })
     }
 
     fun getModelsAndDrivers(deviceTypeId: Int) {
@@ -160,16 +161,16 @@ class PrintServerPresenter(context: Context,
         showProgress()
 
         modelRequest = api.getModels(deviceTypeId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe { hideLoading() }
-                .subscribe({
-                    models = it.models
-                    drivers = it.drivers
-                    showResultInfo(it)
-                }, {
-                    handleError(it)
-                })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe { hideLoading() }
+            .subscribe({
+                models = it.models
+                drivers = it.drivers
+                showResultInfo(it)
+            }, {
+                handleError(it)
+            })
     }
 
     private fun requestSettings(curDriverId: String) {
@@ -181,19 +182,19 @@ class PrintServerPresenter(context: Context,
         showProgress()
 
         settingsRequest = api.getDeviceSettings(curDriverId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    view?.let {
-                        it.hideLoading()
-                        it.showPrintAvailable(isPrintAvailable())
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                view?.let {
+                    it.hideLoading()
+                    it.showPrintAvailable(isPrintAvailable())
                 }
-                .subscribe({ settings ->
-                    deviceSettings = settings
-                    view?.buildSettingsUI(settingsList())
-                    showResultInfo(settings)
-                }, { handleError(it) })
+            }
+            .subscribe({ settings ->
+                deviceSettings = settings
+                view?.buildSettingsUI(settingsList())
+                showResultInfo(settings)
+            }, { handleError(it) })
     }
 
     fun saveSettings() {
@@ -214,18 +215,18 @@ class PrintServerPresenter(context: Context,
         showProgress()
 
         zipSettingsRequest = api.compressSettings(settingsValues)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    view?.let {
-                        it.hideLoading()
-                        it.showPrintAvailable(isPrintAvailable())
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                view?.let {
+                    it.hideLoading()
+                    it.showPrintAvailable(isPrintAvailable())
                 }
-                .subscribe({
-                    zipSettings = it.compressedSettings
-                    showResultInfo(it)
-                }, { handleError(it) })
+            }
+            .subscribe({
+                zipSettings = it.compressedSettings
+                showResultInfo(it)
+            }, { handleError(it) })
     }
 
     fun testPrint() {
@@ -234,27 +235,27 @@ class PrintServerPresenter(context: Context,
         }
 
         val printTasks = listOf(
-                Task().apply { data = context.getString(R.string.test_print) },
-                Task().apply { type = TaskType.PRINT_FOOTER },
-                Task().apply { type = TaskType.CUT })
+            Task().apply { data = context.getString(R.string.test_print) },
+            Task().apply { type = TaskType.PRINT_FOOTER },
+            Task().apply { type = TaskType.CUT })
 
         view?.showLoading(context.getString(R.string.test_print))
 
-        printRequest = PrintServer(url, port, zipSettings ?: "")
-                .execute(printTasks, true)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe {
-                    view?.let {
-                        it.hideLoading()
-                        it.showPrintAvailable(isPrintAvailable())
-                    }
+        printRequest = PrintServer(context, url, port, zipSettings ?: "")
+            .execute(printTasks, true)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe {
+                view?.let {
+                    it.hideLoading()
+                    it.showPrintAvailable(isPrintAvailable())
                 }
-                .subscribe({ response ->
-                    printSuccessful = response.isSuccess()
-                    showResultInfo(response)
-                    view?.showPrintState(printSuccessful)
-                }, { handleError(it) })
+            }
+            .subscribe({ response ->
+                printSuccessful = response.isSuccess()
+                showResultInfo(response)
+                view?.showPrintState(printSuccessful)
+            }, { handleError(it) })
     }
 
     private fun showResultInfo(result: EquipmentResponse) {
@@ -286,14 +287,14 @@ class PrintServerPresenter(context: Context,
         deviceSettings?.let {
             when (vp) {
                 is BooleanSettingsPresenter -> it.boolSettings
-                        .filter { set -> vp.id == set.id }
-                        .forEach { set -> set.value = vp.value }
+                    .filter { set -> vp.id == set.id }
+                    .forEach { set -> set.value = vp.value }
                 is StringSettingsPresenter -> it.stringSettings
-                        .filter { set -> vp.id == set.id }
-                        .forEach { set -> set.value = vp.value }
+                    .filter { set -> vp.id == set.id }
+                    .forEach { set -> set.value = vp.value }
                 is ListSettingsPresenter -> it.listSettings
-                        .filter { set -> vp.id == set.id }
-                        .forEach { set -> set.value = vp.value }
+                    .filter { set -> vp.id == set.id }
+                    .forEach { set -> set.value = vp.value }
             }
         }
     }
@@ -333,31 +334,27 @@ class PrintServerPresenter(context: Context,
 
         val printServerApi = api
         restoreSettingsRequest = printServerApi.extractDeviceSettings(CompressedSettings.create(zipSettings))
-                .subscribeOn(Schedulers.io())
-                .doOnUnsubscribe {
-                    hideLoading()
-                }
-                .doOnNext { response ->
-                    deviceSettings = response
-                }
-                .flatMap { printServerApi.getDeviceTypes() }
-                .flatMap {
-                    deviceTypes = it.deviceTypes
-                    printServerApi.getModels(deviceSettings!!.typeId)
-                }
-                .doOnNext {
-                    models = it.models
-                    drivers = it.drivers
-                    restoreSettingsState()
+            .subscribeOn(Schedulers.io())
+            .doOnUnsubscribe { hideLoading() }
+            .doOnSuccess { deviceSettings = it }
+            .flatMap { printServerApi.getDeviceTypes() }
+            .flatMap {
+                deviceTypes = it.deviceTypes
+                printServerApi.getModels(deviceSettings!!.typeId)
+            }
+            .doOnSuccess {
+                models = it.models
+                drivers = it.drivers
+                restoreSettingsState()
 
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ response ->
-                    connectedSuccessful = response.isSuccess()
-                    showResultInfo(response)
-                    hideLoading()
-                    restoreUiState()
-                }, { handleError(it) })
+            }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ response ->
+                connectedSuccessful = response.isSuccess()
+                showResultInfo(response)
+                hideLoading()
+                restoreUiState()
+            }, { handleError(it) })
     }
 
     private fun handleError(throwable: Throwable?) {

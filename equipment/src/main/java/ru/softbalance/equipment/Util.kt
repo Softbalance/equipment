@@ -3,6 +3,9 @@ package ru.softbalance.equipment
 import android.view.View
 import android.view.ViewConfiguration
 import rx.Subscription
+import java.math.BigDecimal
+
+internal val ONE_HUNDRED = BigDecimal(100)
 
 internal val LINE_SEPARATOR = getSystemProperty("line.separator")
 
@@ -193,13 +196,13 @@ internal fun wrap(str: String?, paramWrapLength: Int, paramNewLineStr: String?, 
             } else {
                 // do not wrap really long word, just extend beyond limit
                 spaceToWrapAt = str.indexOf(' ', wrapLength + offset)
-                if (spaceToWrapAt >= 0) {
+                offset = if (spaceToWrapAt >= 0) {
                     wrappedLine.append(str.substring(offset, spaceToWrapAt))
                     wrappedLine.append(newLineStr)
-                    offset = spaceToWrapAt + 1
+                    spaceToWrapAt + 1
                 } else {
                     wrappedLine.append(str.substring(offset))
-                    offset = inputLineLength
+                    inputLineLength
                 }
             }
         }

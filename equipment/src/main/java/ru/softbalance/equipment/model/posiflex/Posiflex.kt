@@ -155,12 +155,11 @@ class Posiflex(
     }
 
     private fun printOffset() {
-        (1..settings.offsetHeaderBottom)
-            .forEach {
-                val offsetTask = Task()
-                offsetTask.data = " "
-                printStringInternal(offsetTask)
-            }
+        (1..settings.offsetHeaderBottom).forEach {
+            val offsetTask = Task()
+            offsetTask.data = " "
+            printStringInternal(offsetTask)
+        }
     }
 
     private fun printString(task: Task) {
@@ -290,4 +289,7 @@ class Posiflex(
             else -> 0x00
         }
     }
+
+    override fun getTaxes(finishAfterExecute: Boolean): Single<List<Tax>> =
+        Single.fromCallable { emptyList<Tax>() }.subscribeOn(Schedulers.io())
 }
